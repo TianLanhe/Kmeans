@@ -17,7 +17,7 @@ LIBRARY_PATH := /lib
 INCLUDE_PATH := . include
 OTHER_FLAGS := -std=c++11
 
-SOURCE_FILES := $(shell find . -path ./$(MAIN_PATH) -prune -o -name *.cpp -print)
+SOURCE_FILES := $(shell find . -path ./$(MAIN_PATH) -prune -o -path ./ThreadPool/threadPool/window -prune -o -name *.cpp -print)
 DEP_FILES := $(patsubst $(SOURCE_PATH)/%.cpp,$(DEP_PATH)/%.d,$(SOURCE_FILES))
 OBJ_FILES := $(patsubst $(SOURCE_PATH)/%.cpp,$(OBJ_PATH)/%.o,$(SOURCE_FILES))
 TARGET_FILES := $(addprefix $(BIN_PATH)/, $(TARGET))
