@@ -106,11 +106,24 @@ private:
 class CalcNewCenterTask : public Task
 {
 public:
+	CalcNewCenterTask(Cluster* cluster):m_cluster(cluster){
+		m_isChanged = false;
+	}
+
+	static bool GetIsChanged() { return m_isChanged; }
 
 	Status Run() {
+		if (m_cluster->UpdateCenter())
+			m_isChanged = true;
 		return OK;
 	}
+
+private:
+	static bool m_isChanged;
+	Cluster* m_cluster;
 };
+
+bool CalcNewCenterTask::m_isChanged = false;
 
 ///////////////////////////////////////////////
 
@@ -305,7 +318,6 @@ void CKMeans::DistributeSamples() {
 			pool->AddTask(new DistributeTask(cits[i], cits[i + 1], clusters, pmutexs));
 		}
 
-
 		// 开始并发计算
 		Status status = pool->StartTasks();
 		if (status != OK) {
@@ -324,16 +336,46 @@ void CKMeans::DistributeSamples() {
 
 bool CKMeans::CalcNewClustCenters() {
 	strMyRecord *pRecord;
-	bool isNotChanged = true;
-	for (int i = 0; i < m_iNumClusters; ++i) {
-		if (m_Cluster[i].UpdateCenter())
-			isNotChanged = false;
+
+
+	bool isChanged = false;
+	if (THREAD_NUM <= 0) {
+		KMeans::log << "THREAD_NUM = " << THREAD_NUM << " must be greater than 0" << endl;
+		throw(exception("THREAD_NUM error"));
+	}
+	else if (THREAD_NUM == 1) {
+		for (int i = 0; i < m_iNumClusters; ++i)
+			if (m_Cluster[i].UpdateCenter())
+				isChanged = true;
+	}
+	else {
+		ThreadPool *pool = ThreadPoolFactory::GetInstance()->GetThreadPool();
+		pool->SetThreadsNum(THREAD_NUM);
+
+		for (int i = 0; i < m_iNumClusters; ++i)
+			pool->AddTask(new CalcNewCenterTask(&m_Cluster[i]));
+
+		// 开始并发计算
+		Status status = pool->StartTasks();
+		if (status != OK) {
+			KMeans::log << "Start to Distribute Sample Task Error!" << endl;
+			return true;
+		}
+
+		// 等待计算完毕
+		status = pool->WaitForThreads();
+		if (status != OK) {
+			KMeans::log << "Wait for Finishing Distribute Sample Task Error!" << endl;
+			return true;
+		}
+
+		isChanged = CalcNewCenterTask::GetIsChanged();
 	}
 
 	// 如果出现某个簇中对象为空的情况，则随机选择一个簇，挑选距离该簇中心最远且标签不同的对象分配给该空簇
 	for (int i = 0; i < m_iNumClusters; ++i) {
 		if (m_Cluster[i].Empty()) {
-			isNotChanged = false;
+			isChanged = true;
 
 			int index;
 			do {
@@ -355,7 +397,7 @@ bool CKMeans::CalcNewClustCenters() {
 		}
 	}
 
-	return isNotChanged;
+	return isChanged;
 }
 
 bool CKMeans::IsClusterOK(int i) {
@@ -405,7 +447,7 @@ ClusterTree* CKMeans::RunKMeans(int Kvalue) {
 		}
 		KMeans::log << endl;
 
-		if (CalcNewClustCenters())
+		if (!CalcNewClustCenters())
 			break;
 	}
 

@@ -37,9 +37,6 @@ vector<strMyRecord> ReadTestFile() {
 int main() {
 	KMeans::log << "Start K-means clustering proccess ..." << endl;
 
-	// 记录开始时间
-	int start = time(NULL);
-
 	// 创建 CKMeans 对象
 	KOptions options;
 	//options.Unique = true;
@@ -48,13 +45,16 @@ int main() {
 
 	// 读取训练数据集中的数据
 	if (!m_CKMeans.ReadTrainingRecords()) {
-		KMeans::log << "Read trainging records \"" << TRAINING_FILE << "\" error" << endl; 
+		KMeans::log << "Read training records \"" << TRAINING_FILE << "\" error" << endl; 
 		return 1;
 	}
 
+	// 记录开始时间
+	int start = time(NULL);
+
 	// 开始递归聚类过程，生成聚类树
 	ClusterTree *clusterTree = m_CKMeans.RunKMeans(MAXCLUSTER);
-	cout << (time(NULL) - start) << 's' << endl;
+	int train_time = time(NULL) - start;
 
 	// 将聚类结果打印到日志文件中
 	clusterTree->PrintLog();
@@ -65,9 +65,11 @@ int main() {
 	// 读取测试数据集中的数据
 	vector<strMyRecord> testList(ReadTestFile());
 
+
 	// 为测试数据寻找最近的聚类节点，并将该节点的类别作为这条记录的预测类别
 	// 将数据记录的预测类型与正确类别比较，统计模型预测的准确率
 	ConfuseMatrix matrix;
+	start = time(NULL);
 	for (vector<strMyRecord>::size_type i = 0; i < testList.size(); ++i) {
 		ClusterNode* pNode = clusterTree->FindNearestCluster(&testList[i]);
 
@@ -79,6 +81,10 @@ int main() {
 		//KMeans::out << "True Label = " << getLabelName(testList[i].GetLabel()) << "   Pre Label = " << getLabelName(pNode->GetClusterNodeLabel()) << "   Cluster Path = " << pNode->strPath << endl;
 	}
 	KMeans::log << testList.size() << " records have been classified" << endl;
+
+	int classfy_time = time(NULL) - start;
+	KMeans::log << "Training time: " << train_time << " s" << endl;
+	KMeans::log << "Classifing cost: " << classfy_time << " s" << endl;
 
 	matrix.PrintMatrixToLog();
 	KMeans::out << "CLUSTER_PRECITION = " << CLUSTER_PRECITION << " DIMENSION = " << DIMENSION << " Unique = " << (options.Unique ? "true" : "false") << endl;

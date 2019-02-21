@@ -28,7 +28,7 @@ void ConfuseMatrix::PrintMatrixToLog() const
 	int i, j;
 
 	KMeans::out << "================================== Classify Result ====================================" << endl;
-	KMeans::out << "Total Test Records = " << m_total << "  Right_Label Records = " << m_correct << " Right Rate = " << (m_correct * 1.0 / m_total) << endl;
+	KMeans::out << "Total Test Records = " << m_total << "  Right_Label Records = " << m_correct << " Right Rate = " << (m_total == 0 ? 0 : m_correct * 1.0 / m_total) << endl;
 	
 	KMeans::out << "=================================  Confusion Matrix  ==================================" << endl;
 	//打印第一行
