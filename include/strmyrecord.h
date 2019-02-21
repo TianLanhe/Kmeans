@@ -77,7 +77,7 @@ public:
 	typedef record_list::iterator record_iterator;
 	typedef record_list::const_iterator record_const_iterator;
 
-	virtual ~Object() = 0 {}
+	virtual ~Object() {}
 };
 
 #endif // !STR_MY_RECORD_H

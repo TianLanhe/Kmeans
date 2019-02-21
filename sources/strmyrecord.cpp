@@ -194,7 +194,7 @@ std::string strMyRecord::GetFieldName(int index) const {
 	case 16: return "DstHostSrvDiffHostRate";
 	case 17: return "DstHostSrvSerrorRate";
 	default:
-		throw(exception("not this field"));
+		throw(string("not this field"));
 		break;
 	}
 }
@@ -221,7 +221,7 @@ int strMyRecord::GetFieldValue(int index) const {
 	case 16: return iDstHostSrvDiffHostRate;
 	case 17: return iDstHostSrvSerrorRate;
 	default:
-		throw(exception("not this field"));
+		throw(string("not this field"));
 		break;
 	}
 }
@@ -256,7 +256,7 @@ void strMyRecord::SetFieldValue(int index, int value) {
 	case 16: iDstHostSrvDiffHostRate = value; break;
 	case 17: iDstHostSrvSerrorRate = value; break;
 	default:
-		throw(exception("not this field"));
+		throw(string("not this field"));
 		break;
 	}
 }

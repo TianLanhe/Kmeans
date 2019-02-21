@@ -10,7 +10,7 @@ class ClusterNode;
 // 算法参数选项
 struct KOptions
 {
-	struct KOptions():Unique(false),Print(true),Consistency(true){}
+	KOptions():Unique(false),Print(true),Consistency(true){}
 
 	bool Unique;		// 是否去重，默认 false
 	bool Print;			// 是否打印日志，默认 true

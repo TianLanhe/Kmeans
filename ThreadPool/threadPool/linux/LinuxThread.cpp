@@ -115,7 +115,7 @@ Status LinuxThread::Terminate() {
 
     Status retval;
     int ret = pthread_join(*m_threadId,(void**)&retval);
-    return (ret == 0 && val == OK) ? OK : ER;
+    return (ret == 0 && retval == OK) ? OK : ER;
 }
 
 bool LinuxThread::_shouldTerminate(){

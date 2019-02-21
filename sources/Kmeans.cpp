@@ -268,7 +268,7 @@ void CKMeans::DistributeSamples() {
 
 	if (THREAD_NUM <= 0) {
 		KMeans::log << "THREAD_NUM = " << THREAD_NUM << " must be greater than 0" << endl;
-		throw(exception("THREAD_NUM error"));
+		throw(string("THREAD_NUM error"));
 	}
 	else if (THREAD_NUM == 1) {
 		for (record_const_iterator cit = m_RecordsList.begin(); cit != m_RecordsList.end(); ++cit) {
@@ -341,7 +341,7 @@ bool CKMeans::CalcNewClustCenters() {
 	bool isChanged = false;
 	if (THREAD_NUM <= 0) {
 		KMeans::log << "THREAD_NUM = " << THREAD_NUM << " must be greater than 0" << endl;
-		throw(exception("THREAD_NUM error"));
+		throw(string("THREAD_NUM error"));
 	}
 	else if (THREAD_NUM == 1) {
 		for (int i = 0; i < m_iNumClusters; ++i)

@@ -91,7 +91,7 @@ std::string Cluster::GetCenterStr() const {
 
 void Cluster::Add(strMyRecord* record) {
 	if (_isCalculated())
-		throw(exception("can not add record to a centain cluster"));
+		throw(exception(string("can not add record to a centain cluster")));
 
 	m_records.push_back(record);
 }
