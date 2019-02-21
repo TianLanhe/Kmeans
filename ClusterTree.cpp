@@ -1,8 +1,8 @@
 #include "ClusterTree.h"
+#include "Log.h"
 
 #include <iostream>
 #include <cmath>
-#include "Log.h"
 
 using namespace std;
 

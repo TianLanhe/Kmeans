@@ -11,6 +11,8 @@ public:
 	friend std::istream& operator >> (std::istream &, strMyRecord &);
 	friend std::ostream& operator<<(std::ostream &, const strMyRecord &);
 
+	strMyRecord();
+
 public:
 	// 获取第 i 个字段的值
 	int GetFieldValue(int index) const;
@@ -23,6 +25,8 @@ public:
 	void SetFieldValue(int index, int value);
 	// 设置这条记录的分类标签
 	void SetLabel(int value);
+
+	int GetID() const { return m_id; }
 
 private:
 	int _stringToInt(const std::string&);
@@ -47,6 +51,8 @@ private:
 	BYTE iDstHostSrvDiffHostRate;	//37 不同主机连接相同端口比例
 	BYTE iDstHostSrvSerrorRate;	//39 连接当前主机有S0错误的比例
 	BYTE iLabel;	//42 类型标签
+
+	int m_id;
 };
 
 std::istream& operator >> (std::istream &, strMyRecord &);
@@ -60,7 +66,7 @@ BYTE getService(const std::string& str);
 BYTE getStatusFlag(const std::string& str);
 // 将从文件读取到的字符串标签转换为符号值
 BYTE getLabel(const std::string& str);
-// 将符号值标签转化为字符串
+// 将符号值标签转换为字符串
 std::string getLabelName(BYTE label);
 
 
