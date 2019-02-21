@@ -2,7 +2,7 @@
 
 #if defined(_WIN32) || defined(_WIN64)
     #include "window/WinThreadPool.h"
-#elif defined(linux) || defined(__APPLE__)
+#elif defined(__linux__) || defined(__APPLE__)
     #include "linux/LinuxThreadPool.h"
 #endif
 
@@ -17,9 +17,9 @@ ThreadPoolFactory* ThreadPoolFactory::GetInstance() {
 ThreadPool* ThreadPoolFactory::GetThreadPool() {
 #if defined(_WIN32) || defined(_WIN64)
 	return new WinThreadPool();
-#elif defined(linux) || defined(__APPLE__)
+#elif defined(__linux__) || defined(__APPLE__)
     return new LinuxThreadPool();
 #endif
-
+	
     return nullptr;
 }

@@ -183,14 +183,15 @@ bool CKMeans::ReadTrainingRecords() {
 		do {
 			record = new strMyRecord;
 			in >> *record;
-			if (in)
+			if (in) {
 				m_RecordsList.push_back(record);
+
+				if (m_RecordsList.size() % 10000 == 0) {
+					KMeans::log << "----------- " << m_RecordsList.size() << "  lines have read ----------" << endl;
+				}
+			}
 			else
 				delete record;
-
-			if (m_RecordsList.size() % 10000 == 0) {
-				KMeans::log << "----------- " << m_RecordsList.size() << "  lines have read ----------" << endl;
-			}
 		} while (in);
 	}
 	KMeans::log << m_RecordsList.size() << "  lines have read" << endl;
