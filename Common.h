@@ -3,7 +3,7 @@
 
 #include "strmyrecord.h"
 
-// 最大维数
+// 数据维数
 #define DIMENSION 18
 // 最大子类数
 #define MAXCLUSTER 5
@@ -23,5 +23,7 @@
 #define INTERLEVEL 3
 // 最大迭代次数
 #define MAX_ITERATION 10
+// 并发线程数
+#define THREAD_NUM 4
 
 #endif // !COMMON_H

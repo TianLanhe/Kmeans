@@ -13,7 +13,7 @@ bool Cluster::operator==(const Cluster& other) const {
 	return true;
 }
 
-bool Cluster::Equal(strMyRecord* record) {
+bool Cluster::Equal(strMyRecord* record) const {
 	for (int i = 0; i < DIMENSION; ++i)
 		if (fabs(m_center[i] - record->GetFieldValue(i)) > 1e-5)
 			return false;
@@ -82,10 +82,10 @@ std::string Cluster::GetCenterStr() const {
 		if (num.find('.') != string::npos) {
 			num = num.substr(0, num.find('.') + 3);
 		}
-		ret.append(1,prefix).append(num);
+		ret.append(1, prefix).append(num);
 		prefix = ',';
 	}
-	ret.append(1,']');
+	ret.append(1, ']');
 	return ret;
 }
 
@@ -138,7 +138,7 @@ bool Cluster::UpdateCenter() {
 	return false;
 }
 
-double Cluster::CalcDistance(strMyRecord *record) {
+double Cluster::CalcDistance(strMyRecord *record) const {
 	double fDist = 0;
 	for (int i = 0; i < DIMENSION; ++i)
 		fDist += pow((record->GetFieldValue(i) - m_center[i]), 2);
@@ -185,7 +185,6 @@ ostream& operator<<(ostream& out, const Cluster& cluster) {
 
 		out.precision(precision);
 		out << resetiosflags(ios::left);
-
 		/*out << "Center:" << GetCenterStr() << ' ';*/
 	}
 	return out;

@@ -167,6 +167,11 @@ istream& operator >> (istream &in, strMyRecord &record) {
 	return in;
 }
 
+int __global_record_id = 1;
+strMyRecord::strMyRecord():m_id(__global_record_id++) {
+
+}
+
 std::string strMyRecord::GetFieldName(int index) const {
 	switch (index)
 	{

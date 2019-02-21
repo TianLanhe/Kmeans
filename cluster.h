@@ -32,14 +32,14 @@ public:
 	// 更新类簇中心
 	bool UpdateCenter();
 
-	double CalcDistance(strMyRecord *record);
+	double CalcDistance(strMyRecord *record) const;
 
 	// 判断聚类中心是否相等
 	bool operator==(const Cluster&) const;
 	bool operator!=(const Cluster& other) const { return !operator==(other); }
 
 	// 判断聚类中心是否跟记录相等
-	bool Equal(strMyRecord* record);
+	bool Equal(strMyRecord* record) const;
 
 	// 获取属于该聚类的记录总数量
 	int GetTotalNum() const { return m_records.size(); }
