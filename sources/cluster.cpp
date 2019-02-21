@@ -3,6 +3,7 @@
 #include <ostream>
 #include <iostream>
 #include <iomanip>
+#include <cmath>
 
 using namespace std;
 
@@ -91,7 +92,7 @@ std::string Cluster::GetCenterStr() const {
 
 void Cluster::Add(strMyRecord* record) {
 	if (_isCalculated())
-		throw(exception(string("can not add record to a centain cluster")));
+		throw(string("can not add record to a centain cluster"));
 
 	m_records.push_back(record);
 }
