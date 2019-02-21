@@ -17,13 +17,5 @@
 #define	LOG_FILE "Log.txt"
 // 结果文件
 #define RESULT_FILE "Result.txt"
-// 聚类精度阈值
-#define CLUSTER_PRECITION 0.1
-// 聚类树层数
-#define INTERLEVEL 3
-// 最大迭代次数
-#define MAX_ITERATION 10
-// 并发线程数
-#define THREAD_NUM 4
 
 #endif // !COMMON_H

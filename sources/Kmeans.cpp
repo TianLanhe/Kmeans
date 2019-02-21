@@ -267,11 +267,11 @@ void CKMeans::DistributeSamples() {
 	for (int i = 0; i < m_iNumClusters; ++i)
 		m_Cluster[i].Clear();
 
-	if (THREAD_NUM <= 0) {
-		KMeans::log << "THREAD_NUM = " << THREAD_NUM << " must be greater than 0" << endl;
+	if (m_options.ThreadNum <= 0) {
+		KMeans::log << "THREAD_NUM = " << m_options.ThreadNum << " must be greater than 0" << endl;
 		throw(string("THREAD_NUM error"));
 	}
-	else if (THREAD_NUM == 1) {
+	else if (m_options.ThreadNum == 1) {
 		for (record_const_iterator cit = m_RecordsList.begin(); cit != m_RecordsList.end(); ++cit) {
 			index = FindClosestCluster(*cit);
 			m_Cluster[index].Add(*cit);
@@ -280,24 +280,24 @@ void CKMeans::DistributeSamples() {
 	else {
 		// 创建线程池并设置并发线程数为 THREAD_NUM
 		ThreadPool *pool = ThreadPoolFactory::GetInstance()->GetThreadPool();
-		pool->SetThreadsNum(THREAD_NUM);
+		pool->SetThreadsNum(m_options.ThreadNum);
 
 
 		// 将所有记录平均分成 THREAD_NUM 份，交给 THREAD_NUM 条线程并发计算并分配给最近的聚类
-		record_const_iterator cits[THREAD_NUM];
-		for (int i = 0; i < THREAD_NUM; ++i)
+		vector<record_const_iterator> cits(m_options.ThreadNum);
+		for (int i = 0; i < m_options.ThreadNum; ++i)
 			cits[i] = m_RecordsList.begin();
 
 		int count;
 		while (1) {
 			count = 0;
-			while (count < THREAD_NUM && cits[THREAD_NUM - 1] != m_RecordsList.end())
-				++cits[THREAD_NUM - 1], ++count;
+			while (count < m_options.ThreadNum && cits[m_options.ThreadNum - 1] != m_RecordsList.end())
+				++cits[m_options.ThreadNum - 1], ++count;
 
-			if (count != THREAD_NUM)
+			if (count != m_options.ThreadNum)
 				break;
 
-			for (int i = 0; i < THREAD_NUM - 1; ++i) {
+			for (int i = 0; i < m_options.ThreadNum - 1; ++i) {
 				for (count = 0; count <= i; ++count) {
 					++cits[i];
 				}
@@ -315,7 +315,7 @@ void CKMeans::DistributeSamples() {
 
 		// 把任务添加到线程池
 		pool->AddTask(new DistributeTask(m_RecordsList.cbegin(), cits[0], clusters, pmutexs));
-		for (int i = 0; i < THREAD_NUM - 1; ++i) {
+		for (int i = 0; i < m_options.ThreadNum - 1; ++i) {
 			pool->AddTask(new DistributeTask(cits[i], cits[i + 1], clusters, pmutexs));
 		}
 
@@ -340,18 +340,18 @@ bool CKMeans::CalcNewClustCenters() {
 
 
 	bool isChanged = false;
-	if (THREAD_NUM <= 0) {
-		KMeans::log << "THREAD_NUM = " << THREAD_NUM << " must be greater than 0" << endl;
+	if (m_options.ThreadNum <= 0) {
+		KMeans::log << "THREAD_NUM = " << m_options.ThreadNum << " must be greater than 0" << endl;
 		throw(string("THREAD_NUM error"));
 	}
-	else if (THREAD_NUM == 1) {
+	else if (m_options.ThreadNum == 1) {
 		for (int i = 0; i < m_iNumClusters; ++i)
 			if (m_Cluster[i].UpdateCenter())
 				isChanged = true;
 	}
 	else {
 		ThreadPool *pool = ThreadPoolFactory::GetInstance()->GetThreadPool();
-		pool->SetThreadsNum(THREAD_NUM);
+		pool->SetThreadsNum(m_options.ThreadNum);
 
 		for (int i = 0; i < m_iNumClusters; ++i)
 			pool->AddTask(new CalcNewCenterTask(&m_Cluster[i]));
@@ -405,15 +405,15 @@ bool CKMeans::IsClusterOK(int i) {
 	int count = m_Cluster[i].GetIncorrectNum();
 	double precition = m_Cluster[i].GetClusterPrecition();
 
-	if (m_ClusterLevel <= INTERLEVEL) {
+	if (m_ClusterLevel <= m_options.PrecisionIncreaseLevel) {
 		if (count > 100) {
 			KMeans::log << "Cluster " << i << " IncorrectNum = " << count << " > 100" << endl;
 			return false;
 		}
 		else {
-			if (precition >= CLUSTER_PRECITION)
-				KMeans::log << "Cluster " << i << " Precition = " << precition << " >= " << CLUSTER_PRECITION << endl;
-			return precition < CLUSTER_PRECITION;
+			if (precition >= m_options.ClusterPrecision)
+				KMeans::log << "Cluster " << i << " Precition = " << precition << " >= " << m_options.ClusterPrecision << endl;
+			return precition < m_options.ClusterPrecision;
 		}
 	}
 	else {
@@ -422,9 +422,9 @@ bool CKMeans::IsClusterOK(int i) {
 			return false;
 		}
 		else {
-			if (precition >= (m_ClusterLevel - INTERLEVEL) * CLUSTER_PRECITION)
-				KMeans::log << "Cluster " << i << " Precition = " << precition << " >= " << (m_ClusterLevel - INTERLEVEL) * CLUSTER_PRECITION << endl;
-			return precition < (m_ClusterLevel - INTERLEVEL) * CLUSTER_PRECITION;
+			if (precition >= (m_ClusterLevel - m_options.PrecisionIncreaseLevel) * m_options.ClusterPrecision)
+				KMeans::log << "Cluster " << i << " Precition = " << precition << " >= " << (m_ClusterLevel - m_options.PrecisionIncreaseLevel) * m_options.ClusterPrecision << endl;
+			return precition < (m_ClusterLevel - m_options.PrecisionIncreaseLevel) * m_options.ClusterPrecision;
 		}
 	}
 }

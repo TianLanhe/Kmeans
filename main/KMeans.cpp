@@ -87,7 +87,7 @@ int main() {
 	KMeans::log << "Classifing cost: " << classfy_time << " s" << endl;
 
 	matrix.PrintMatrixToLog();
-	KMeans::out << "CLUSTER_PRECITION = " << CLUSTER_PRECITION << " DIMENSION = " << DIMENSION << " Unique = " << (options.Unique ? "true" : "false") << endl;
+	KMeans::out << "CLUSTER_PRECITION = " << m_CKMeans.GetOptions().ClusterPrecision << " DIMENSION = " << DIMENSION << " Unique = " << (options.Unique ? "true" : "false") << endl;
 	KMeans::out << "FieldName: ";
 	for (int i = 0; i < DIMENSION; ++i) {
 		KMeans::out << testList[0].GetFieldName(i) << ' ';

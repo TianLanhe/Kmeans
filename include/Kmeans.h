@@ -10,11 +10,16 @@ class ClusterNode;
 // 算法参数选项
 struct KOptions
 {
-	KOptions():Unique(false),Print(true),Consistency(true){}
+	KOptions():Unique(false),Print(true),Consistency(true),ClusterPrecision(0.1),
+	MaxLevel(10),ThreadNum(4),PrecisionIncreaseLevel(3){}
 
 	bool Unique;		// 是否去重，默认 false
 	bool Print;			// 是否打印日志，默认 true
 	bool Consistency;	// 结果是否需要强一致(多线程并发的随机性可能导致训练结果的不确定性)，默认 true
+	double ClusterPrecision;	// 聚类精度阈值，默认 0.1
+	int MaxLevel;				// 聚类树最大层数，默认 10
+	int ThreadNum;				// 并发线程数量，默认 4
+	int PrecisionIncreaseLevel;	// 聚类精度递增的层数阈值，默认 3
 };
 
 class CKMeans : public Object
@@ -30,6 +35,9 @@ public:
 
 	//K-means算法的总体过程
 	ClusterTree* RunKMeans(int Kvalue);
+
+	// 获取算法的参数配置
+	KOptions GetOptions() const { return m_options; }
 
 private:
 	CKMeans(ClusterNode *pSelf, ClusterTree *pTree, int KmeansID, int Level, const record_list& pDataList, KOptions options);
@@ -56,7 +64,7 @@ private:
 	int GetDiffLabelofCluster(int i);
 
 	//判断是否结束递归过程
-	bool IsStopRecursion(int i) { return m_ClusterLevel >= MAX_ITERATION; }
+	bool IsStopRecursion(int i) { return m_ClusterLevel >= m_options.MaxLevel; }
 
 	//创建聚类树节点
 	void CreatClusterTreeNode(ClusterNode *pParent);
