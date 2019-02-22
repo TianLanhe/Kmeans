@@ -58,15 +58,6 @@ ClusterNode* ClusterNode::GetNearestCluster(strMyRecord *pRecord) {
 	return pNearestNode;
 }
 
-void ClusterNode::PrintLog() {
-	KMeans::log << "Cluster " << strPath << ": " << m_cluster << endl;
-	KMeans::log << "IsClusterOK: " << (IsClusterOK ? "true" : "false") << " IsLeaf:" << IsLeaf << " Center: " << m_cluster.GetCenterStr() << endl;
-
-	for (int i = 0; i < MAX_LABEL; i++)
-		if (pChildNode[i] != NULL)
-			pChildNode[i]->PrintLog();
-}
-
 void insertNode(ClusterNode *root, ClusterNode *parent, ClusterNode *node, int index) {
 	if (parent == root) {
 		root->pChildNode[index] = node;
@@ -85,8 +76,23 @@ void ClusterTree::InsertNode(ClusterNode *pParent, ClusterNode *pNode, int index
 		insertNode(pRootNode, pParent, pNode, index);
 }
 
-void ClusterTree::PrintLog() {
-	for (int i = 0; i < MAXCLUSTER; ++i)
-		if (pRootNode->pChildNode[i])
-			pRootNode->pChildNode[i]->PrintLog();
+ostream& operator<<(ostream& out, const ClusterNode& node) {
+	if (out) {
+		out << "Cluster " << node.strPath << ": " << node.m_cluster << endl;
+		out << "IsClusterOK: " << (node.IsClusterOK ? "true" : "false") << " IsLeaf:" << node.IsLeaf << " Center: " << node.m_cluster.GetCenterStr() << endl;
+
+		for (int i = 0; i < MAX_LABEL; i++)
+			if (node.pChildNode[i] != NULL)
+				out << *node.pChildNode[i];
+	}
+	return out;
+}
+
+ostream& operator<<(ostream& out,const ClusterTree& tree) {
+	if (out) {
+		for (int i = 0; i < MAXCLUSTER; ++i)
+			if (tree.pRootNode->pChildNode[i])
+				out << *tree.pRootNode->pChildNode[i];
+	}
+	return out;
 }

@@ -5,16 +5,17 @@
 #include "Common.h"
 
 #include <map>
+#include <vector>
 
 class Cluster : public Object
 {
 public:
 	friend std::ostream& operator<<(std::ostream& out, const Cluster& cluster);
 
+	typedef std::vector<double>::size_type center_size_type;
+
 public:
-	Cluster() :m_hasCalculated(false), m_mainLabel(0), m_clusterPrecition(1.0) {
-		for (int i = 0; i < DIMENSION; ++i)
-			m_center[i] = 0.0;
+	Cluster(int dimension = 0) :m_hasCalculated(false), m_mainLabel(0), m_clusterPrecition(1.0), m_center(dimension, 0.0) {
 	}
 
 	// 初始化一个聚类：清空所有数据，并添加一条记录，再更新中心为这条记录
@@ -74,7 +75,7 @@ private:
 	void _calculateInfo() const;
 
 private:
-	double m_center[DIMENSION]; // 类簇中心
+	std::vector<double> m_center; // 类簇中心
 	record_list m_records;		// 属于该聚类的记录
 
 	mutable std::map<int, int> m_labelMap;	// 每个类别的记录数量

@@ -3,8 +3,6 @@
 
 #include "strmyrecord.h"
 
-// 数据维数
-#define DIMENSION 18
 // 最大子类数
 #define MAXCLUSTER 5
 // 最大子类数

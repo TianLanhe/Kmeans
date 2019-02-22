@@ -41,6 +41,7 @@ int main() {
 	KOptions options;
 	//options.Unique = true;
 	//options.Consistency = false;
+	//options.ThreadNum = 1;
 	CKMeans m_CKMeans(options);
 
 	// 读取训练数据集中的数据
@@ -57,7 +58,7 @@ int main() {
 	int train_time = time(NULL) - start;
 
 	// 将聚类结果打印到日志文件中
-	clusterTree->PrintLog();
+	KMeans::log << *clusterTree;
 
 	KMeans::log << "Start classifying testing records ... " << endl;
 	KMeans::out << "********************** Classification Result **************************" << endl;
@@ -87,9 +88,9 @@ int main() {
 	KMeans::log << "Classifing cost: " << classfy_time << " s" << endl;
 
 	matrix.PrintMatrixToLog();
-	KMeans::out << "CLUSTER_PRECITION = " << m_CKMeans.GetOptions().ClusterPrecision << " DIMENSION = " << DIMENSION << " Unique = " << (options.Unique ? "true" : "false") << endl;
+	KMeans::out << "CLUSTER_PRECITION = " << m_CKMeans.GetOptions().ClusterPrecision << " DIMENSION = " << options.Dimension << " Unique = " << (options.Unique ? "true" : "false") << endl;
 	KMeans::out << "FieldName: ";
-	for (int i = 0; i < DIMENSION; ++i) {
+	for (int i = 0; i < options.Dimension; ++i) {
 		KMeans::out << testList[0].GetFieldName(i) << ' ';
 	}
 	KMeans::out << endl;

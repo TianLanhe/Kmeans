@@ -8,14 +8,14 @@
 using namespace std;
 
 bool Cluster::operator==(const Cluster& other) const {
-	for (int i = 0; i < DIMENSION; ++i)
+	for (center_size_type i = 0; i < m_center.size(); ++i)
 		if (fabs(m_center[i] - other.m_center[i]) > 1e-5)
 			return false;
 	return true;
 }
 
 bool Cluster::Equal(strMyRecord* record) const {
-	for (int i = 0; i < DIMENSION; ++i)
+	for (center_size_type i = 0; i < m_center.size(); ++i)
 		if (fabs(m_center[i] - record->GetFieldValue(i)) > 1e-5)
 			return false;
 	return true;
@@ -105,12 +105,12 @@ void Cluster::Clear() {
 void Cluster::Init(strMyRecord* record) {
 	Clear();
 	Add(record);
-	for (int i = 0; i < DIMENSION; ++i)
+	for (center_size_type i = 0; i < m_center.size(); ++i)
 		m_center[i] = record->GetFieldValue(i);
 }
 
 bool Cluster::UpdateCenter() {
-	Cluster TempCenter;
+	Cluster TempCenter(m_center.size());
 	strMyRecord *pRecord;
 
 	// 聚类中没有元素了，聚簇中心不存在
@@ -120,18 +120,18 @@ bool Cluster::UpdateCenter() {
 	// 所有记录的各个维度进行累加
 	for (record_const_iterator cit = m_records.begin(); cit != m_records.end(); ++cit) {
 		pRecord = *cit;
-		for (int i = 0; i < DIMENSION; ++i)
+		for (center_size_type i = 0; i < m_center.size(); ++i)
 			TempCenter.m_center[i] += pRecord->GetFieldValue(i);
 	}
 
 	// 每个维度求平均值
-	for (int j = 0; j < DIMENSION; ++j) {
+	for (center_size_type j = 0; j < m_center.size(); ++j) {
 		TempCenter.m_center[j] /= m_records.size();
 	}
 
 	// 更新聚簇中心
 	if (this->operator!=(TempCenter)) {
-		for (int i = 0; i < DIMENSION; ++i)
+		for (center_size_type i = 0; i < m_center.size(); ++i)
 			m_center[i] = TempCenter.m_center[i];
 		return true;
 	}
@@ -141,7 +141,8 @@ bool Cluster::UpdateCenter() {
 
 double Cluster::CalcDistance(strMyRecord *record) const {
 	double fDist = 0;
-	for (int i = 0; i < DIMENSION; ++i)
+
+	for (center_size_type i = 0; i < m_center.size(); ++i)
 		fDist += pow((record->GetFieldValue(i) - m_center[i]), 2);
 
 	/*fDist += pow(pRecord->iProtocolType - m_Cluster[id].Center[0], 2);

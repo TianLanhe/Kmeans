@@ -222,6 +222,7 @@ void CKMeans::InitClusters(unsigned int NumClusters) {
 
 	//初始化 m_iNumClusters 个类的中心点
 	m_iNumClusters = NumClusters;				// 对预测的聚类树k进行赋值
+	m_Cluster.resize(m_iNumClusters, Cluster(m_options.Dimension));
 	for (int i = 0; i < m_iNumClusters; ++i) {
 		pRecord = *RecdListIter;
 
@@ -230,6 +231,8 @@ void CKMeans::InitClusters(unsigned int NumClusters) {
 			++RecdListIter;
 			if (RecdListIter == m_RecordsList.end()) {
 				m_iNumClusters = i + 1;
+				while (m_Cluster.size() != m_iNumClusters)
+					m_Cluster.pop_back();
 				KMeans::log << "can only find " << m_iNumClusters << " kind of different label" << endl;
 				return;
 			}

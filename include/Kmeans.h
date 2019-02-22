@@ -4,15 +4,18 @@
 #include "Common.h"
 #include "cluster.h"
 
+#include <vector>
+
 class ClusterTree;
 class ClusterNode;
 
 // 算法参数选项
 struct KOptions
 {
-	KOptions():Unique(false),Print(true),Consistency(true),ClusterPrecision(0.1),
-	MaxLevel(10),ThreadNum(4),PrecisionIncreaseLevel(3){}
+	KOptions() :Dimension(18), Unique(false), Print(true), Consistency(true), ClusterPrecision(0.1),
+		MaxLevel(10), ThreadNum(4), PrecisionIncreaseLevel(3) {}
 
+	int Dimension;		// 数据维数，默认 18
 	bool Unique;		// 是否去重，默认 false
 	bool Print;			// 是否打印日志，默认 true
 	bool Consistency;	// 结果是否需要强一致(多线程并发的随机性可能导致训练结果的不确定性)，默认 true
@@ -80,7 +83,7 @@ private:
 private:
 	record_list m_RecordsList;	//数据记录链表
 	unsigned int m_iNumClusters;	//聚类的类别数(即K值)
-	Cluster m_Cluster[MAXCLUSTER];	//子类数组
+	std::vector<Cluster> m_Cluster;	//子类数组
 	int m_ClusterLevel;	//聚类对象所处的层次
 	int m_KmeansID;		//CKMeans对象的ID号
 	ClusterTree *pClusterTree;	//聚类树的指针

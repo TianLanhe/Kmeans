@@ -1,12 +1,16 @@
 #ifndef CLUSTER_TREE_H
 #define CLUSTER_TREE_H
 
-#include "Common.h"
 #include "cluster.h"
+
 #include <string>
+#include <ostream>
 
 class ClusterNode
 {
+public:
+	friend std::ostream& operator<<(std::ostream&, const ClusterNode&);
+
 public:
 	//构造函数
 	ClusterNode() :pParentNode(NULL), IsClusterOK(false), IsLeaf(0) { for (int i = 0; i < MAXCLUSTER; ++i) pChildNode[i] = NULL; }
@@ -23,9 +27,6 @@ public:
 
 	//递归函数，在以该节点为父亲的子树中，获得与数据记录距离最近的聚类节点
 	ClusterNode* GetNearestCluster(strMyRecord* pRecord);
-
-	//将聚类树输出到日志文件中
-	void PrintLog();
 
 public:
 	Cluster m_cluster;				//聚类信息
@@ -45,6 +46,9 @@ public:
 class ClusterTree
 {
 public:
+	friend std::ostream& operator<<(std::ostream&, const ClusterTree&);
+
+public:
 	//构造函数
 	ClusterTree() {
 		pRootNode = new ClusterNode();
@@ -62,11 +66,11 @@ public:
 	//获得根节点
 	ClusterNode* GetRootNode() { return pRootNode; }
 
-	//将聚类树输出到日志文件中
-	void PrintLog();
-
 private:
 	ClusterNode* pRootNode;	//根节点指针
 };
+
+std::ostream& operator<<(std::ostream&, const ClusterNode&);
+std::ostream& operator<<(std::ostream&, const ClusterTree&);
 
 #endif // !CLUSTER_TREE_H

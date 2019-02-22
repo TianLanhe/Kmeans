@@ -13,7 +13,7 @@ namespace KMeans {
 		void clear() { m_ostreams.clear(); }
 
 		template< typename T >
-		Log& operator<<(T t) {
+		Log& operator<<(const T& t) {
 			for (std::vector<std::ostream*>::size_type i = 0; i < m_ostreams.size(); ++i)
 				(*m_ostreams[i]) << t;
 			return *this;
