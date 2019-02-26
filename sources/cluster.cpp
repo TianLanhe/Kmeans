@@ -145,25 +145,6 @@ double Cluster::CalcDistance(strMyRecord *record) const {
 	for (center_size_type i = 0; i < m_center.size(); ++i)
 		fDist += pow((record->GetFieldValue(i) - m_center[i]), 2);
 
-	/*fDist += pow(pRecord->iProtocolType - m_Cluster[id].Center[0], 2);
-	fDist += pow(pRecord->iService - m_Cluster[id].Center[1], 2);
-	fDist += pow(pRecord->iStatusFlag - m_Cluster[id].Center[2], 2);
-	fDist += pow(pRecord->iSrcBytes - m_Cluster[id].Center[3], 2);
-	fDist += pow(pRecord->iDestBytes - m_Cluster[id].Center[4], 2);
-	fDist += pow(pRecord->iFailedLogins - m_Cluster[id].Center[5], 2);
-	fDist += pow(pRecord->iNumofRoot - m_Cluster[id].Center[6], 2);
-	fDist += pow(pRecord->iCount - m_Cluster[id].Center[7], 2);
-	fDist += pow(pRecord->iSvrCount - m_Cluster[id].Center[8], 2);
-	fDist += pow(pRecord->iRerrorRate - m_Cluster[id].Center[9], 2);
-	fDist += pow(pRecord->iSameSrvRate - m_Cluster[id].Center[10], 2);
-	fDist += pow(pRecord->iDiffSrvRate - m_Cluster[id].Center[11], 2);
-	fDist += pow(pRecord->iDstHostSrvCount - m_Cluster[id].Center[12], 2);
-	fDist += pow(pRecord->iDstHostSameSrvRate - m_Cluster[id].Center[13], 2);
-	fDist += pow(pRecord->iDstHostDiffSrvRate - m_Cluster[id].Center[13], 2);
-	fDist += pow(pRecord->iDstHostSameSrcPortRate - m_Cluster[id].Center[15], 2);
-	fDist += pow(pRecord->iDstHostSrvDiffHostRate - m_Cluster[id].Center[16], 2);
-	fDist += pow(pRecord->iDstHostSrvSerrorRate - m_Cluster[id].Center[17], 2);*/
-
 	// 省去开方
 	return fDist;
 }

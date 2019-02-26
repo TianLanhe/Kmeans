@@ -2,6 +2,7 @@
 #define LOG_H
 
 #include <ostream>
+#include <iostream>
 #include <vector>
 
 namespace KMeans {
@@ -10,7 +11,12 @@ namespace KMeans {
 	{
 	public:
 		void add(std::ostream* ost) { m_ostreams.push_back(ost); }
-		void clear() { m_ostreams.clear(); }
+		void clear() {
+			for (std::vector<std::ostream*>::size_type i = 0; i < m_ostreams.size(); ++i)
+				if (m_ostreams[i] != &std::cout && m_ostreams[i] != &std::cerr)
+					delete m_ostreams[i];
+			m_ostreams.clear();
+		}
 
 		template< typename T >
 		Log& operator<<(const T& t) {
@@ -29,7 +35,6 @@ namespace KMeans {
 		std::vector<std::ostream*> m_ostreams;
 	};
 
-	extern Log log;
 	extern Log out;
 
 }

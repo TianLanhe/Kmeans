@@ -1,32 +1,25 @@
 #include "ClusterTree.h"
 #include "Log.h"
 
-#include <iostream>
 #include <cmath>
 
 using namespace std;
 
 ClusterNode::~ClusterNode() {
-	if (IsLeaf == 0) {
-		for (int i = 0; i < MAXCLUSTER; ++i) {
-			if (pChildNode[i] != NULL) {
+	if (IsLeaf == 0)
+		for (int i = 0; i < pChildNode.size(); ++i)
+			if (pChildNode[i] != NULL)
 				delete pChildNode[i];
-			}
-		}
-	}
 }
 
-double ClusterNode::CalCenterDistance(strMyRecord* pRecord) {
-	if (!pRecord)
-		return 0;
-
-	return m_cluster.CalcDistance(pRecord);
+double ClusterNode::CalCenterDistance(strMyRecord* pRecord) const {
+	return pRecord ? m_cluster.CalcDistance(pRecord) : 0;
 }
 
-ClusterNode* ClusterNode::GetNearestCluster(strMyRecord *pRecord) {
+const ClusterNode* ClusterNode::GetNearestCluster(strMyRecord *pRecord) const {
 	int i;
 	double MinDistance, TmpDistance;		// 最短距离，临时距离
-	ClusterNode* pNearestNode;			// 距离最近节点的指针
+	const ClusterNode* pNearestNode;		// 距离最近节点的指针
 
 	pNearestNode = this;
 
@@ -38,9 +31,9 @@ ClusterNode* ClusterNode::GetNearestCluster(strMyRecord *pRecord) {
 
 		// 判断是否有孩子节点，如果有，调用递归函数，获得孩子节点所在的子树中
 		// 离数据距离最近的节点指针
-		for (i = 0; i < MAXCLUSTER; ++i) {
+		for (i = 0; i < pChildNode.size(); ++i) {
 			if (pChildNode[i] != NULL) {
-				ClusterNode* pTmpNode = pChildNode[i]->GetNearestCluster(pRecord);
+				const ClusterNode* pTmpNode = pChildNode[i]->GetNearestCluster(pRecord);
 
 				// 计算最近子节点与数据的距离
 				TmpDistance = pTmpNode->CalCenterDistance(pRecord);
@@ -52,28 +45,32 @@ ClusterNode* ClusterNode::GetNearestCluster(strMyRecord *pRecord) {
 			}
 		}
 		if (fabs(MinDistance + 1) < 1e-5) {
-			cerr << "IsLeaf == 0 but has no child" << endl;
+			throw(string("IsLeaf == 0 but has no child"));
 		}
 	}
 	return pNearestNode;
 }
 
-void insertNode(ClusterNode *root, ClusterNode *parent, ClusterNode *node, int index) {
+void insertNode(ClusterNode *root, ClusterNode *parent, ClusterNode *node) {
 	if (parent == root) {
-		root->pChildNode[index] = node;
+		int size = root->pChildNode.size();
+
+		root->pChildNode.push_back(node);
 		root->IsLeaf = 0;
+
 		node->pParentNode = root;
+		node->strPath = root->strPath + '.' + to_string(size);
 	}
 	else {
-		for (int i = 0; i < MAXCLUSTER; ++i)
+		for (int i = 0; i < root->pChildNode.size(); ++i)
 			if (root->pChildNode[i])
-				insertNode(root->pChildNode[i], parent, node, index);
+				insertNode(root->pChildNode[i], parent, node);
 	}
 }
 
-void ClusterTree::InsertNode(ClusterNode *pParent, ClusterNode *pNode, int index) {
-	if (pParent && pNode && index >= 0)
-		insertNode(pRootNode, pParent, pNode, index);
+void ClusterTree::InsertNode(ClusterNode *pParent, ClusterNode *pNode) {
+	if (pParent && pNode)
+		insertNode(pRootNode, pParent, pNode);
 }
 
 ostream& operator<<(ostream& out, const ClusterNode& node) {
@@ -81,16 +78,16 @@ ostream& operator<<(ostream& out, const ClusterNode& node) {
 		out << "Cluster " << node.strPath << ": " << node.m_cluster << endl;
 		out << "IsClusterOK: " << (node.IsClusterOK ? "true" : "false") << " IsLeaf:" << node.IsLeaf << " Center: " << node.m_cluster.GetCenterStr() << endl;
 
-		for (int i = 0; i < MAX_LABEL; i++)
+		for (int i = 0; i < node.pChildNode.size(); i++)
 			if (node.pChildNode[i] != NULL)
 				out << *node.pChildNode[i];
 	}
 	return out;
 }
 
-ostream& operator<<(ostream& out,const ClusterTree& tree) {
+ostream& operator<<(ostream& out, const ClusterTree& tree) {
 	if (out) {
-		for (int i = 0; i < MAXCLUSTER; ++i)
+		for (int i = 0; i < tree.pRootNode->pChildNode.size(); ++i)
 			if (tree.pRootNode->pChildNode[i])
 				out << *tree.pRootNode->pChildNode[i];
 	}

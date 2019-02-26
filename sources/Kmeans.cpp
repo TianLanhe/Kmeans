@@ -1,7 +1,5 @@
 #include "Kmeans.h"
-#include "Common.h"
 #include "ClusterTree.h"
-#include "Log.h"
 #include "ThreadPool/include/ThreadPoolFactory.h"
 #include "ThreadPool/include/ThreadPool.h"
 #include "ThreadPool/include/Task.h"
@@ -106,7 +104,7 @@ private:
 class CalcNewCenterTask : public Task
 {
 public:
-	CalcNewCenterTask(Cluster* cluster):m_cluster(cluster){
+	CalcNewCenterTask(Cluster* cluster) :m_cluster(cluster) {
 		m_isChanged = false;
 	}
 
@@ -127,9 +125,9 @@ bool CalcNewCenterTask::m_isChanged = false;
 
 ///////////////////////////////////////////////
 
-CKMeans::CKMeans(ClusterNode *pSelf, ClusterTree *pTree, int KmeansID, int Level, const record_list& pDataList, KOptions options) :pSelfClusterNode(pSelf), pClusterTree(pTree), m_KmeansID(KmeansID), m_ClusterLevel(Level), m_RecordsList(pDataList), m_iNumClusters(0), m_options(options)
+CKMeans::CKMeans(ClusterNode *pSelf, ClusterTree *pTree, int KmeansID, int Level, const record_list& pDataList, KOptions options, KMeans::Log* l) :pSelfClusterNode(pSelf), pClusterTree(pTree), m_KmeansID(KmeansID), m_ClusterLevel(Level), m_RecordsList(pDataList), m_iNumClusters(0), m_options(options), m_log(l)
 {
-	KMeans::log << "********** Creat a new Kmeans, ID = " << m_KmeansID << " **********" << endl;
+	(*m_log) << "********** Creat a new Kmeans, ID = " << m_KmeansID << " **********" << endl;
 }
 
 CKMeans::CKMeans(KOptions options)
@@ -140,13 +138,21 @@ CKMeans::CKMeans(KOptions options)
 	pClusterTree = new ClusterTree();
 	pSelfClusterNode = pClusterTree->GetRootNode();
 
-	KMeans::log << "********** Creat a new Kmeans, ID = " << m_KmeansID << " **********" << endl;
+	m_log = new KMeans::Log();
+	if (m_options.Print)
+		m_log->add(&cout);
+	if (!m_options.LogFile.empty())
+		m_log->add(new ofstream(m_options.LogFile.c_str()));
+
+	(*m_log) << "********** Creat a new Kmeans, ID = " << m_KmeansID << " **********" << endl;
 }
 
 CKMeans::~CKMeans() {
 	if (pSelfClusterNode->pParentNode == NULL)
 		for (record_iterator it = m_RecordsList.begin(); it != m_RecordsList.end(); ++it)
 			delete *it;
+	if (pSelfClusterNode->pParentNode == NULL)
+		delete m_log;
 }
 
 bool CKMeans::ReadTrainingRecords() {
@@ -154,7 +160,7 @@ bool CKMeans::ReadTrainingRecords() {
 	if (!in)
 		return false;
 
-	KMeans::log << "Start reading training records from " << TRAINING_FILE << " ..." << endl;
+	(*m_log) << "Start reading training records from " << TRAINING_FILE << " ..." << endl;
 
 	if (m_options.Unique) {
 		map<string, int> m;
@@ -164,7 +170,7 @@ bool CKMeans::ReadTrainingRecords() {
 			m[line]++;
 
 			if (++count % 10000 == 0) {
-				KMeans::log << "----------- " << count << "  lines have read ----------" << endl;
+				(*m_log) << "----------- " << count << "  lines have read ----------" << endl;
 			}
 		}
 
@@ -187,21 +193,21 @@ bool CKMeans::ReadTrainingRecords() {
 				m_RecordsList.push_back(record);
 
 				if (m_RecordsList.size() % 10000 == 0) {
-					KMeans::log << "----------- " << m_RecordsList.size() << "  lines have read ----------" << endl;
+					(*m_log) << "----------- " << m_RecordsList.size() << "  lines have read ----------" << endl;
 				}
 			}
 			else
 				delete record;
 		} while (in);
 	}
-	KMeans::log << m_RecordsList.size() << "  lines have read" << endl;
+	(*m_log) << m_RecordsList.size() << "  lines have read" << endl;
 	in.close();
 
 	return true;
 }
 
-bool CKMeans::isSameAsCluster(int i, strMyRecord *pRecord) {
-	for (int j = 0; j < i && j < m_iNumClusters; ++j) {
+bool CKMeans::isSameAsCluster(strMyRecord *pRecord) const {
+	for (int j = 0; j < m_Cluster.size(); ++j) {
 		if (m_Cluster[j].GetMainLabel() == pRecord->GetLabel() || m_Cluster[j].Equal(pRecord))
 			return true;
 	}
@@ -218,38 +224,30 @@ void CKMeans::InitClusters(unsigned int NumClusters) {
 	if (m_options.Consistency)
 		sort(m_RecordsList.begin(), m_RecordsList.end(), RecordComp);
 
-	record_iterator RecdListIter = m_RecordsList.begin();
+	// 对预测的聚类树k进行赋值
+	m_iNumClusters = NumClusters;
 
 	//初始化 m_iNumClusters 个类的中心点
-	m_iNumClusters = NumClusters;				// 对预测的聚类树k进行赋值
-	m_Cluster.resize(m_iNumClusters, Cluster(m_options.Dimension));
-	for (int i = 0; i < m_iNumClusters; ++i) {
-		pRecord = *RecdListIter;
+	for (record_const_iterator cit = m_RecordsList.begin(); cit != m_RecordsList.end(); ++cit) {
+		if (m_Cluster.size() == NumClusters)
+			break;
 
-		//在记录链表中查找出一个与之前的聚类中心数字不同的记录作为中心
-		while (isSameAsCluster(i, pRecord)) {
-			++RecdListIter;
-			if (RecdListIter == m_RecordsList.end()) {
-				m_iNumClusters = i + 1;
-				while (m_Cluster.size() != m_iNumClusters)
-					m_Cluster.pop_back();
-				KMeans::log << "can only find " << m_iNumClusters << " kind of different label" << endl;
-				return;
-			}
-
-			pRecord = *RecdListIter;
+		pRecord = *cit;
+		if (!isSameAsCluster(pRecord)) {
+			// 将找到的记录作为一个新的聚类中心保存起来
+			Cluster c(m_options.Dimension);
+			c.Init(pRecord);
+			m_Cluster.push_back(c);
 		}
+	}
 
-		// 将找到的记录作为一个新的聚类中心保存起来
-		// 将记录插入该类的成员链表
-		// m_Cluster[i].MemberList.push_back(pRecord);
-		// 将当前记录的数值赋给第i个聚类中心
-		// EvaluateCluster(i, pRecord);
-		m_Cluster[i].Init(pRecord);
+	if (m_Cluster.size() != NumClusters) {
+		(*m_log) << "can only find " << m_Cluster.size() << " kind of different label" << endl;
+		m_iNumClusters = m_Cluster.size();
 	}
 }
 
-int CKMeans::FindClosestCluster(strMyRecord *pRecord) {
+int CKMeans::FindClosestCluster(strMyRecord *pRecord) const {
 	int minindex = 0;
 	double dist;
 	double mindist = m_Cluster[minindex].CalcDistance(pRecord);
@@ -271,7 +269,7 @@ void CKMeans::DistributeSamples() {
 		m_Cluster[i].Clear();
 
 	if (m_options.ThreadNum <= 0) {
-		KMeans::log << "THREAD_NUM = " << m_options.ThreadNum << " must be greater than 0" << endl;
+		(*m_log) << "THREAD_NUM = " << m_options.ThreadNum << " must be greater than 0" << endl;
 		throw(string("THREAD_NUM error"));
 	}
 	else if (m_options.ThreadNum == 1) {
@@ -325,14 +323,14 @@ void CKMeans::DistributeSamples() {
 		// 开始并发计算
 		Status status = pool->StartTasks();
 		if (status != OK) {
-			KMeans::log << "Start to Distribute Sample Task Error!" << endl;
+			(*m_log) << "Start to Distribute Sample Task Error!" << endl;
 			return;
 		}
 
 		// 等待计算完毕
 		status = pool->WaitForThreads();
 		if (status != OK) {
-			KMeans::log << "Wait for Finishing Distribute Sample Task Error!" << endl;
+			(*m_log) << "Wait for Finishing Distribute Sample Task Error!" << endl;
 			return;
 		}
 	}
@@ -344,7 +342,7 @@ bool CKMeans::CalcNewClustCenters() {
 
 	bool isChanged = false;
 	if (m_options.ThreadNum <= 0) {
-		KMeans::log << "THREAD_NUM = " << m_options.ThreadNum << " must be greater than 0" << endl;
+		(*m_log) << "THREAD_NUM = " << m_options.ThreadNum << " must be greater than 0" << endl;
 		throw(string("THREAD_NUM error"));
 	}
 	else if (m_options.ThreadNum == 1) {
@@ -362,14 +360,14 @@ bool CKMeans::CalcNewClustCenters() {
 		// 开始并发计算
 		Status status = pool->StartTasks();
 		if (status != OK) {
-			KMeans::log << "Start to Distribute Sample Task Error!" << endl;
+			(*m_log) << "Start to Distribute Sample Task Error!" << endl;
 			return true;
 		}
 
 		// 等待计算完毕
 		status = pool->WaitForThreads();
 		if (status != OK) {
-			KMeans::log << "Wait for Finishing Distribute Sample Task Error!" << endl;
+			(*m_log) << "Wait for Finishing Distribute Sample Task Error!" << endl;
 			return true;
 		}
 
@@ -404,40 +402,40 @@ bool CKMeans::CalcNewClustCenters() {
 	return isChanged;
 }
 
-bool CKMeans::IsClusterOK(int i) {
+bool CKMeans::IsClusterOK(int i)  const {
 	int count = m_Cluster[i].GetIncorrectNum();
 	double precition = m_Cluster[i].GetClusterPrecition();
 
 	if (m_ClusterLevel <= m_options.PrecisionIncreaseLevel) {
 		if (count > 100) {
-			KMeans::log << "Cluster " << i << " IncorrectNum = " << count << " > 100" << endl;
+			(*m_log) << "Cluster " << i << " IncorrectNum = " << count << " > 100" << endl;
 			return false;
 		}
 		else {
 			if (precition >= m_options.ClusterPrecision)
-				KMeans::log << "Cluster " << i << " Precition = " << precition << " >= " << m_options.ClusterPrecision << endl;
+				(*m_log) << "Cluster " << i << " Precition = " << precition << " >= " << m_options.ClusterPrecision << endl;
 			return precition < m_options.ClusterPrecision;
 		}
 	}
 	else {
 		if (count > 500) {
-			KMeans::log << "Cluster " << i << " IncorrectNum = " << count << " > 500" << endl;
+			(*m_log) << "Cluster " << i << " IncorrectNum = " << count << " > 500" << endl;
 			return false;
 		}
 		else {
 			if (precition >= (m_ClusterLevel - m_options.PrecisionIncreaseLevel) * m_options.ClusterPrecision)
-				KMeans::log << "Cluster " << i << " Precition = " << precition << " >= " << (m_ClusterLevel - m_options.PrecisionIncreaseLevel) * m_options.ClusterPrecision << endl;
+				(*m_log) << "Cluster " << i << " Precition = " << precition << " >= " << (m_ClusterLevel - m_options.PrecisionIncreaseLevel) * m_options.ClusterPrecision << endl;
 			return precition < (m_ClusterLevel - m_options.PrecisionIncreaseLevel) * m_options.ClusterPrecision;
 		}
 	}
 }
 
 int ext_global_kmeansID;
-ClusterTree* CKMeans::RunKMeans(int Kvalue) {
-	KMeans::log << "Init K-value = " << Kvalue << endl;
+ClusterTree* CKMeans::RunKMeans() {
+	(*m_log) << "Init K-value = " << m_options.KValue << endl;
 
 	// 初始化本次聚类的中心
-	InitClusters(Kvalue);
+	InitClusters(m_options.KValue);
 
 	// 循环进行下面的过程：将每条记录分配给最近的聚类中心，并计算新的聚类中心
 	// 直至每个聚类中心都没有发生变化，则停止迭代
@@ -445,43 +443,45 @@ ClusterTree* CKMeans::RunKMeans(int Kvalue) {
 	while (1) {
 		DistributeSamples();
 
-		KMeans::log << "Cirle " << setw(2) << ++count << " | ";
+		(*m_log) << "Cirle " << setw(2) << ++count << " | ";
 		for (int i = 0; i < m_iNumClusters; ++i) {
-			KMeans::log << "Cluster " << i << ": " << setw(6) << m_Cluster[i].GetRecordList().size() << " | ";
+			(*m_log) << "Cluster " << i << ": " << setw(6) << m_Cluster[i].GetRecordList().size() << " | ";
 		}
-		KMeans::log << endl;
+		(*m_log) << endl;
 
 		if (!CalcNewClustCenters())
 			break;
 	}
 
 	// 打印本次聚类的结果
-	KMeans::log << "************** KMeans ID:" << m_KmeansID << " Level:" << m_ClusterLevel << " **************" << endl;
+	(*m_log) << "************** KMeans ID:" << m_KmeansID << " Level:" << m_ClusterLevel << " **************" << endl;
 	for (int i = 0; i < m_iNumClusters; ++i) {
-		KMeans::log << "Cluster " << i << ": " << m_Cluster[i] << endl;
+		(*m_log) << "Cluster " << i << ": " << m_Cluster[i] << endl;
 	}
-	KMeans::log << "******************************************" << endl;
+	(*m_log) << "******************************************" << endl;
 
-	CreatClusterTreeNode(pSelfClusterNode);
+	CreatClusterTreeNode();
 
 	if (pSelfClusterNode->pParentNode == NULL)
 		ext_global_kmeansID = m_KmeansID;
 
 	for (int i = 0; i < m_iNumClusters; ++i) {
 		if (IsClusterOK(i))
-			pClusterNode[i]->IsLeaf = 1;
+			pSelfClusterNode->GetChildNode(i)->IsLeaf = 1;
 		else if (IsStopRecursion(i))
-			pClusterNode[i]->IsLeaf = 2;
+			pSelfClusterNode->GetChildNode(i)->IsLeaf = 2;
 		else {
-			pClusterNode[i]->IsLeaf = 0;
-			CKMeans(pClusterNode[i], pClusterTree, ++ext_global_kmeansID, m_ClusterLevel + 1, m_Cluster[i].GetRecordList(), m_options).RunKMeans(GetDiffLabelofCluster(i));
+			pSelfClusterNode->GetChildNode(i)->IsLeaf = 0;
+			KOptions options = m_options;
+			options.KValue = GetDiffLabelofCluster(i);
+			CKMeans(pSelfClusterNode->GetChildNode(i), pClusterTree, ++ext_global_kmeansID, m_ClusterLevel + 1, m_Cluster[i].GetRecordList(), options, m_log).RunKMeans();
 		}
 	}
 
 	return pClusterTree;
 }
 
-int CKMeans::GetDiffLabelofCluster(int i) {
+int CKMeans::GetDiffLabelofCluster(int i) const {
 	return m_Cluster[i].GetLabelNum();
 }
 
@@ -491,18 +491,16 @@ std::string intToString(int i) {
 	return s.str();
 }
 
-void CKMeans::CreatClusterTreeNode(ClusterNode *pParent) {
+void CKMeans::CreatClusterTreeNode() {
 	for (int i = 0; i < m_iNumClusters; ++i) {
 		ClusterNode *pNode = new ClusterNode();
 
-		pNode->strPath = pParent->strPath + '.' + intToString(i);
 		m_Cluster[i].CalcInfo();
 		pNode->m_cluster = m_Cluster[i];
 		pNode->m_cluster.GetRecordList().clear();
 		pNode->IsClusterOK = IsClusterOK(i);
 		pNode->IsLeaf = (pNode->IsClusterOK ? 1 : IsStopRecursion(i) ? 2 : 0);
 
-		pClusterNode[i] = pNode;
-		pClusterTree->InsertNode(pParent, pNode, i);
+		pClusterTree->InsertNode(pSelfClusterNode, pNode);
 	}
 }

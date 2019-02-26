@@ -1,17 +1,12 @@
 #include "confuse_matrix.h"
-#include <iostream>
+
+#include <ostream>
 #include <iomanip>
-#include "Log.h"
 
 using namespace std;
 
 //构造函数
-ConfuseMatrix::ConfuseMatrix():m_total(0),m_correct(0)
-{
-	for (int i = 0; i < MAX_LABEL; i++)
-		for (int j = 0; j < MAX_LABEL; j++)
-			m_matrix[i][j] = 0;
-};
+ConfuseMatrix::ConfuseMatrix(int row, int col) :m_total(0), m_correct(0), m_matrix(row, vector<int>(col, 0)) { }
 
 //数值更新函数
 void ConfuseMatrix::UpdateValue(int iTrueLabel, int iPreLabel)
@@ -23,25 +18,26 @@ void ConfuseMatrix::UpdateValue(int iTrueLabel, int iPreLabel)
 };
 
 //打印混淆矩阵
-void ConfuseMatrix::PrintMatrixToLog() const
-{
+ostream& operator<<(ostream& out, const ConfuseMatrix& matrix) {
 	int i, j;
+	if (out) {
+		out << "================================== Classify Result ====================================" << endl;
+		out << "Total Test Records = " << matrix.m_total << "  Right_Label Records = " << matrix.m_correct << " Right Rate = " << (matrix.m_total == 0 ? 0 : matrix.m_correct * 1.0 / matrix.m_total) << endl;
 
-	KMeans::out << "================================== Classify Result ====================================" << endl;
-	KMeans::out << "Total Test Records = " << m_total << "  Right_Label Records = " << m_correct << " Right Rate = " << (m_total == 0 ? 0 : m_correct * 1.0 / m_total) << endl;
-	
-	KMeans::out << "=================================  Confusion Matrix  ==================================" << endl;
-	//打印第一行
-	KMeans::out << setiosflags(ios::left) << setw(5) << "T/P";
-	for (i = 0; i < MAX_LABEL; i++)
-		KMeans::out << setiosflags(ios::left) << setw(7) << i;
-	KMeans::out << endl;
-	
-	//打印矩阵内容
-	for (i = 0; i < MAX_LABEL; i++){
-		KMeans::out << setiosflags(ios::left) << setw(5) << i;
-		for (j = 0; j < MAX_LABEL; j++)
-			KMeans::out << setiosflags(ios::left) << setw(7) << m_matrix[i][j];
-		KMeans::out << endl;
+		out << "=================================  Confusion Matrix  ==================================" << endl;
+		//打印第一行
+		out << setiosflags(ios::left) << setw(5) << "T/P";
+		for (i = 0; i < matrix.m_matrix[0].size(); i++)
+			out << setiosflags(ios::left) << setw(7) << i;
+		out << endl;
+
+		//打印矩阵内容
+		for (i = 0; i < matrix.m_matrix.size(); i++) {
+			out << setiosflags(ios::left) << setw(5) << i;
+			for (j = 0; j < matrix.m_matrix[i].size(); j++)
+				out << setiosflags(ios::left) << setw(7) << matrix.m_matrix[i][j];
+			out << endl;
+		}
 	}
+	return out;
 };

@@ -2,7 +2,6 @@
 #define CLUSTER_H
 
 #include "strmyrecord.h"
-#include "Common.h"
 
 #include <map>
 #include <vector>

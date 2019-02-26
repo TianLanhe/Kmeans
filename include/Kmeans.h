@@ -3,6 +3,7 @@
 
 #include "Common.h"
 #include "cluster.h"
+#include "Log.h"
 
 #include <vector>
 
@@ -13,7 +14,7 @@ class ClusterNode;
 struct KOptions
 {
 	KOptions() :Dimension(18), Unique(false), Print(true), Consistency(true), ClusterPrecision(0.1),
-		MaxLevel(10), ThreadNum(4), PrecisionIncreaseLevel(3) {}
+		MaxLevel(10), ThreadNum(4), PrecisionIncreaseLevel(3), KValue(5),LogFile("Log.txt") {}
 
 	int Dimension;		// 数据维数，默认 18
 	bool Unique;		// 是否去重，默认 false
@@ -23,6 +24,8 @@ struct KOptions
 	int MaxLevel;				// 聚类树最大层数，默认 10
 	int ThreadNum;				// 并发线程数量，默认 4
 	int PrecisionIncreaseLevel;	// 聚类精度递增的层数阈值，默认 3
+	int KValue;			// K值，要分成几个聚类，默认 5
+	std::string LogFile;		// 日志文件，默认为 "Log.txt"，若为空，则不写入文件
 };
 
 class CKMeans : public Object
@@ -37,16 +40,16 @@ public:
 	bool ReadTrainingRecords();
 
 	//K-means算法的总体过程
-	ClusterTree* RunKMeans(int Kvalue);
+	ClusterTree* RunKMeans();
 
 	// 获取算法的参数配置
 	KOptions GetOptions() const { return m_options; }
 
 private:
-	CKMeans(ClusterNode *pSelf, ClusterTree *pTree, int KmeansID, int Level, const record_list& pDataList, KOptions options);
+	CKMeans(ClusterNode *pSelf, ClusterTree *pTree, int KmeansID, int Level, const record_list& pDataList, KOptions options,KMeans::Log* l);
 
 	//判断该条记录与之前的聚类中心是否完全相同
-	bool isSameAsCluster(int i, strMyRecord *pRecord);
+	bool isSameAsCluster(strMyRecord *pRecord) const;
 
 	//K-means算法的第一步：从n个数据对象任意选择k个对象作为初始聚类中心
 	void InitClusters(unsigned int NumClusters);
@@ -58,19 +61,19 @@ private:
 	bool CalcNewClustCenters();
 
 	//找到离给定数据对象最近的一个聚类
-	int FindClosestCluster(strMyRecord *pRecord);
+	int FindClosestCluster(strMyRecord *pRecord) const;
 
 	//检查聚类后一类中的分类是否合理
-	bool IsClusterOK(int i);
+	bool IsClusterOK(int i) const;
 
 	//获得本对象中子类i包含不同的Label个数
-	int GetDiffLabelofCluster(int i);
+	int GetDiffLabelofCluster(int i) const;
 
 	//判断是否结束递归过程
-	bool IsStopRecursion(int i) { return m_ClusterLevel >= m_options.MaxLevel; }
+	bool IsStopRecursion(int i) const { return m_ClusterLevel >= m_options.MaxLevel; }
 
 	//创建聚类树节点
-	void CreatClusterTreeNode(ClusterNode *pParent);
+	void CreatClusterTreeNode();
 
 	// 随机数相关函数
 	int initRandSeed();
@@ -87,10 +90,11 @@ private:
 	int m_ClusterLevel;	//聚类对象所处的层次
 	int m_KmeansID;		//CKMeans对象的ID号
 	ClusterTree *pClusterTree;	//聚类树的指针
-	ClusterNode *pClusterNode[MAXCLUSTER];	//本对象孩子节点的指针
 	ClusterNode *pSelfClusterNode;	//与本KMeans对象相关的聚类节点的指针
 
 	KOptions m_options;
+
+	KMeans::Log *m_log;
 };
 
 #endif // !KMEANS_H

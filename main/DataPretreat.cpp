@@ -1,5 +1,5 @@
 ﻿#include "strmyrecord.h"
-#include <list>
+#include <vector>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	cout << "Start reading records from " << filename << ".." << endl;
-	list<strMyRecord> records;
+	vector<strMyRecord> records;
 	strMyRecord record;
 	stringstream s;
 	string line, word;
@@ -148,7 +148,7 @@ int main(int argc, char *argv[]) {
 
 	int count = 0;
 	cout << "Start writing records into " << filename << "..." << endl;
-	for (list<strMyRecord>::const_iterator cit = records.begin(); cit != records.end(); ++cit) {
+	for (vector<strMyRecord>::const_iterator cit = records.begin(); cit != records.end(); ++cit) {
 		out << *cit << endl;
 
 		++count;
