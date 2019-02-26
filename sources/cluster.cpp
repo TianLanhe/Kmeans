@@ -8,6 +8,8 @@
 using namespace std;
 
 bool Cluster::operator==(const Cluster& other) const {
+	if (other.m_center.size() != m_center.size())
+		return false;
 	for (center_size_type i = 0; i < m_center.size(); ++i)
 		if (fabs(m_center[i] - other.m_center[i]) > 1e-5)
 			return false;
@@ -15,6 +17,8 @@ bool Cluster::operator==(const Cluster& other) const {
 }
 
 bool Cluster::Equal(strMyRecord* record) const {
+	if (other.m_center.size() != record->GetFieldNum())
+		return false;
 	for (center_size_type i = 0; i < m_center.size(); ++i)
 		if (fabs(m_center[i] - record->GetFieldValue(i)) > 1e-5)
 			return false;
@@ -43,7 +47,10 @@ void Cluster::_calculateInfo() const {
 	}
 
 	// 计算聚类精度 = (非主类别记录数量 / 主类别记录数量)
-	m_clusterPrecition = (m_records.size() - m_labelMap[m_mainLabel])*1.0 / m_labelMap[m_mainLabel];
+	if (maxNum == 0)
+		m_clusterPrecition = 1.0;
+	else
+		m_clusterPrecition = (m_records.size() - maxNum)*1.0 / maxNum;
 }
 
 int Cluster::GetMainNum() const {
@@ -91,10 +98,8 @@ std::string Cluster::GetCenterStr() const {
 }
 
 void Cluster::Add(strMyRecord* record) {
-	if (_isCalculated())
-		throw(string("can not add record to a centain cluster"));
-
 	m_records.push_back(record);
+	m_hasCalculated = false;
 }
 
 void Cluster::Clear() {
@@ -105,8 +110,9 @@ void Cluster::Clear() {
 void Cluster::Init(strMyRecord* record) {
 	Clear();
 	Add(record);
-	for (center_size_type i = 0; i < m_center.size(); ++i)
-		m_center[i] = record->GetFieldValue(i);
+	m_center.clear();
+	for (center_size_type i = 0; i < record->GetFieldNum(); ++i)
+		m_center.push_back(record->GetFieldValue(i));
 }
 
 bool Cluster::UpdateCenter() {

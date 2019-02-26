@@ -14,6 +14,8 @@ public:
 	strMyRecord();
 
 public:
+	// 获取字段个数
+	int GetFieldNum() const;
 	// 获取第 i 个字段的值
 	int GetFieldValue(int index) const;
 	// 获取第 i 个字段的名称
