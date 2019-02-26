@@ -4,7 +4,6 @@
 #include <iostream>
 
 using namespace std;
-using namespace KMeans;
 
 Log createGlobalOutputer() {
 	Log log;
@@ -19,4 +18,4 @@ Log createGlobalOutputer() {
 	return log;
 }
 
-Log KMeans::out = createGlobalOutputer();
+Log out = createGlobalOutputer();

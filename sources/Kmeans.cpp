@@ -1,5 +1,6 @@
 #include "Kmeans.h"
 #include "ClusterTree.h"
+#include "Log.h"
 #include "ThreadPool/include/ThreadPoolFactory.h"
 #include "ThreadPool/include/ThreadPool.h"
 #include "ThreadPool/include/Task.h"
@@ -126,7 +127,7 @@ bool CalcNewCenterTask::m_isChanged = false;
 
 ///////////////////////////////////////////////
 
-CKMeans::CKMeans(ClusterNode *pSelf, ClusterTree *pTree, int KmeansID, int Level, const record_list& pDataList, KOptions options, KMeans::Log* l) :pSelfClusterNode(pSelf), pClusterTree(pTree), m_KmeansID(KmeansID), m_ClusterLevel(Level), m_RecordsList(pDataList), m_options(options), m_log(l)
+CKMeans::CKMeans(ClusterNode *pSelf, ClusterTree *pTree, int KmeansID, int Level, const record_list& pDataList, KOptions options, Log* l) :pSelfClusterNode(pSelf), pClusterTree(pTree), m_KmeansID(KmeansID), m_ClusterLevel(Level), m_RecordsList(pDataList), m_options(options), m_log(l)
 {
 	(*m_log) << "********** Creat a new Kmeans, ID = " << m_KmeansID << " **********" << endl;
 }
@@ -139,7 +140,7 @@ CKMeans::CKMeans(KOptions options)
 	pClusterTree = new ClusterTree();
 	pSelfClusterNode = pClusterTree->GetRootNode();
 
-	m_log = new KMeans::Log();
+	m_log = new Log();
 	if (m_options.Print)
 		m_log->add(&cout);
 	if (!m_options.LogFile.empty())

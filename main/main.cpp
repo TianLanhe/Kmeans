@@ -63,7 +63,7 @@ int main() {
 	cout << *clusterTree;
 
 	cout << "Start classifying testing records ... " << endl;
-	KMeans::out << "********************** Classification Result **************************" << endl;
+	out << "********************** Classification Result **************************" << endl;
 
 	// 读取测试数据集中的数据
 	vector<strMyRecord> testList(ReadTestFile());
@@ -81,7 +81,7 @@ int main() {
 		if ((i + 1) % 10000 == 0) {
 			cout << "----------- " << i + 1 << "  records have been done ----------" << endl;
 		}
-		//KMeans::out << "True Label = " << getLabelName(testList[i].GetLabel()) << "   Pre Label = " << getLabelName(pNode->GetClusterNodeLabel()) << "   Cluster Path = " << pNode->strPath << endl;
+		//out << "True Label = " << getLabelName(testList[i].GetLabel()) << "   Pre Label = " << getLabelName(pNode->GetClusterNodeLabel()) << "   Cluster Path = " << pNode->strPath << endl;
 	}
 	cout << testList.size() << " records have been classified" << endl;
 
@@ -89,13 +89,13 @@ int main() {
 	cout << "Training time: " << train_time << " s" << endl;
 	cout << "Classifing cost: " << classfy_time << " s" << endl;
 
-	KMeans::out << matrix;
-	KMeans::out << "CLUSTER_PRECITION = " << m_CKMeans.GetOptions().ClusterPrecision << " DIMENSION = " << options.Dimension << " Unique = " << (options.Unique ? "true" : "false") << endl;
-	KMeans::out << "FieldName: ";
+	out << matrix;
+	out << "CLUSTER_PRECITION = " << m_CKMeans.GetOptions().ClusterPrecision << " DIMENSION = " << options.Dimension << " Unique = " << (options.Unique ? "true" : "false") << endl;
+	out << "FieldName: ";
 	for (int i = 0; i < options.Dimension; ++i) {
-		KMeans::out << testList[0].GetFieldName(i) << ' ';
+		out << testList[0].GetFieldName(i) << ' ';
 	}
-	KMeans::out << endl;
+	out << endl;
 
 	delete clusterTree;
 	return 0;

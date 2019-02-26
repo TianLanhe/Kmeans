@@ -2,13 +2,13 @@
 #define KMEANS_H
 
 #include "Common.h"
-#include "cluster.h"
-#include "Log.h"
+#include "Cluster.h"
 
 #include <vector>
 
 class ClusterTree;
 class ClusterNode;
+class Log;
 
 // 算法参数选项
 struct KOptions
@@ -45,7 +45,7 @@ public:
 	KOptions GetOptions() const { return m_options; }
 
 private:
-	CKMeans(ClusterNode *pSelf, ClusterTree *pTree, int KmeansID, int Level, const record_list& pDataList, KOptions options,KMeans::Log* l);
+	CKMeans(ClusterNode *pSelf, ClusterTree *pTree, int KmeansID, int Level, const record_list& pDataList, KOptions options,Log* l);
 
 	//判断该条记录与之前的聚类中心是否完全相同
 	bool isSameAsCluster(strMyRecord *pRecord) const;
@@ -92,7 +92,7 @@ private:
 
 	KOptions m_options;				// 聚类算法相关参数选项
 
-	KMeans::Log *m_log;
+	Log *m_log;
 };
 
 #endif // !KMEANS_H
