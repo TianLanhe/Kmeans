@@ -14,8 +14,7 @@ public:
 	typedef std::vector<double>::size_type center_size_type;
 
 public:
-	Cluster(int dimension = 0) :m_hasCalculated(false), m_mainLabel(0), m_clusterPrecition(1.0), m_center(dimension, 0.0) {
-	}
+	Cluster(int dimension = 0) :m_hasCalculated(false), m_mainLabel(0), m_clusterPrecition(1.0), m_center(dimension, 0.0) {}
 
 	// 初始化一个聚类：清空所有数据，并添加一条记录，再更新中心为这条记录
 	void Init(strMyRecord* record);
@@ -34,7 +33,7 @@ public:
 
 	double CalcDistance(strMyRecord *record) const;
 
-	// 判断聚类中心是否相等
+	// 判断聚类中心是否相等，中心相等即对象相等
 	bool operator==(const Cluster&) const;
 	bool operator!=(const Cluster& other) const { return !operator==(other); }
 
@@ -56,6 +55,7 @@ public:
 	// 获取该类簇的主类别
 	int GetMainLabel() const;
 
+	// 获取聚类中心的字符串表示
 	std::string GetCenterStr() const;
 
 	// 获取该类簇的聚类精度

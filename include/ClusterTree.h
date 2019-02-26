@@ -1,27 +1,32 @@
 #ifndef CLUSTER_TREE_H
 #define CLUSTER_TREE_H
 
-#include "cluster.h"
+#include "Cluster.h"
 
 #include <string>
-#include <ostream>
 #include <vector>
 
 class ClusterNode
 {
 public:
 	friend std::ostream& operator<<(std::ostream&, const ClusterNode&);
+	friend class ClusterTree;
 
 public:
 	//构造函数
 	ClusterNode() :pParentNode(NULL), IsClusterOK(false), IsLeaf(0) { }
+	ClusterNode(const Cluster& c, bool isOk, int isLeaf) :m_cluster(c), IsClusterOK(isOk), IsLeaf(isLeaf) { m_cluster.GetRecordList().clear(); }
 	~ClusterNode();
 
 	//计算该条记录到该节点中心的距离
 	double CalCenterDistance(strMyRecord* pRecord) const;
 
 	//获得孩子i的指针
+	int GetChildCount() const { return pChildNode.size(); }
 	ClusterNode* GetChildNode(int i) const { return pChildNode[i]; }
+
+	//获得父亲节点的指针
+	ClusterNode* GetParentNode() const { return pParentNode; }
 
 	//获得本节点的聚类标签
 	int GetClusterNodeLabel() const { return m_cluster.GetMainLabel(); }
@@ -29,7 +34,7 @@ public:
 	//递归函数，在以该节点为父亲的子树中，获得与数据记录距离最近的聚类节点
 	const ClusterNode* GetNearestCluster(strMyRecord* pRecord) const ;
 
-public:
+private:
 	Cluster m_cluster;				//聚类信息
 	bool IsClusterOK;				//聚类结果是否符合标准
 
@@ -66,6 +71,9 @@ public:
 
 	//获得根节点
 	ClusterNode* GetRootNode() const { return pRootNode; }
+
+private:
+	void _insertNode(ClusterNode *root, ClusterNode *parent, ClusterNode *node);
 
 private:
 	ClusterNode* pRootNode;	//根节点指针

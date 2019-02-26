@@ -1,6 +1,6 @@
 #include "ClusterTree.h"
 #include "Kmeans.h"
-#include "confuse_matrix.h"
+#include "ConfuseMatrix.h"
 #include "Log.h"
 
 #include <fstream>
@@ -42,7 +42,7 @@ int main() {
 	//options.Unique = true;
 	//options.Consistency = false;
 	options.ThreadNum = 1;
-	options.Print = false;
+	//options.Print = false;
 	options.LogFile = "";
 	CKMeans m_CKMeans(options);
 

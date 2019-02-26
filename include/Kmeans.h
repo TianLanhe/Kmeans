@@ -31,7 +31,6 @@ struct KOptions
 class CKMeans : public Object
 {
 public:
-	//构造函数1
 	CKMeans(KOptions options = KOptions());
 
 	~CKMeans();
@@ -84,15 +83,14 @@ private:
 	int getRandomNumByRange(int start, int end);
 
 private:
-	record_list m_RecordsList;	//数据记录链表
-	unsigned int m_iNumClusters;	//聚类的类别数(即K值)
-	std::vector<Cluster> m_Cluster;	//子类数组
-	int m_ClusterLevel;	//聚类对象所处的层次
-	int m_KmeansID;		//CKMeans对象的ID号
-	ClusterTree *pClusterTree;	//聚类树的指针
-	ClusterNode *pSelfClusterNode;	//与本KMeans对象相关的聚类节点的指针
+	record_list m_RecordsList;		// 数据记录链表
+	std::vector<Cluster> m_Cluster;	// 子类数组
+	int m_ClusterLevel;				// 聚类对象所处的层次
+	int m_KmeansID;					// CKMeans对象的ID号
+	ClusterTree *pClusterTree;		// 聚类树的指针
+	ClusterNode *pSelfClusterNode;	// 与本KMeans对象相关的聚类节点的指针
 
-	KOptions m_options;
+	KOptions m_options;				// 聚类算法相关参数选项
 
 	KMeans::Log *m_log;
 };

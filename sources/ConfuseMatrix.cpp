@@ -1,4 +1,4 @@
-#include "confuse_matrix.h"
+#include "ConfuseMatrix.h"
 
 #include <ostream>
 #include <iomanip>

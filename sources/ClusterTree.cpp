@@ -51,7 +51,7 @@ const ClusterNode* ClusterNode::GetNearestCluster(strMyRecord *pRecord) const {
 	return pNearestNode;
 }
 
-void insertNode(ClusterNode *root, ClusterNode *parent, ClusterNode *node) {
+void ClusterTree::_insertNode(ClusterNode *root, ClusterNode *parent, ClusterNode *node) {
 	if (parent == root) {
 		int size = root->pChildNode.size();
 
@@ -64,13 +64,13 @@ void insertNode(ClusterNode *root, ClusterNode *parent, ClusterNode *node) {
 	else {
 		for (int i = 0; i < root->pChildNode.size(); ++i)
 			if (root->pChildNode[i])
-				insertNode(root->pChildNode[i], parent, node);
+				_insertNode(root->pChildNode[i], parent, node);
 	}
 }
 
 void ClusterTree::InsertNode(ClusterNode *pParent, ClusterNode *pNode) {
 	if (pParent && pNode)
-		insertNode(pRootNode, pParent, pNode);
+		_insertNode(pRootNode, pParent, pNode);
 }
 
 ostream& operator<<(ostream& out, const ClusterNode& node) {
@@ -87,9 +87,10 @@ ostream& operator<<(ostream& out, const ClusterNode& node) {
 
 ostream& operator<<(ostream& out, const ClusterTree& tree) {
 	if (out) {
-		for (int i = 0; i < tree.pRootNode->pChildNode.size(); ++i)
-			if (tree.pRootNode->pChildNode[i])
-				out << *tree.pRootNode->pChildNode[i];
+		// 根节点不存储聚类信息
+		for (int i = 0; i < tree.pRootNode->GetChildCount(); ++i)
+			if (tree.pRootNode->GetChildNode(i))
+				out << *tree.pRootNode->GetChildNode(i);
 	}
 	return out;
 }

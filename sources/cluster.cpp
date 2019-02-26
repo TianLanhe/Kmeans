@@ -1,4 +1,4 @@
-#include "cluster.h"
+#include "Cluster.h"
 
 #include <ostream>
 #include <iostream>
@@ -17,7 +17,7 @@ bool Cluster::operator==(const Cluster& other) const {
 }
 
 bool Cluster::Equal(strMyRecord* record) const {
-	if (other.m_center.size() != record->GetFieldNum())
+	if (m_center.size() != record->GetFieldNum())
 		return false;
 	for (center_size_type i = 0; i < m_center.size(); ++i)
 		if (fabs(m_center[i] - record->GetFieldValue(i)) > 1e-5)
