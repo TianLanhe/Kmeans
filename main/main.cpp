@@ -62,6 +62,10 @@ int main() {
 	// 将聚类结果打印到日志文件中
 	cout << *clusterTree;
 
+	Log out;
+	out.add(&cout);
+	out.add(new ofstream(RESULT_FILE));
+
 	cout << "Start classifying testing records ... " << endl;
 	out << "********************** Classification Result **************************" << endl;
 

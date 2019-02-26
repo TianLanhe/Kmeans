@@ -33,6 +33,4 @@ private:
 	std::vector<std::ostream*> m_ostreams;
 };
 
-extern Log out;
-
 #endif // !LOG_H
