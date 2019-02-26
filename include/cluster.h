@@ -67,7 +67,7 @@ public:
 	const record_list& GetRecordList() const { return m_records; }
 
 	// 计算上述数据
-	void CalcInfo() { _calculateInfo(); }
+	void CalcInfo() const { _calculateInfo(); }
 
 private:
 	bool _isCalculated() const { return m_hasCalculated; }

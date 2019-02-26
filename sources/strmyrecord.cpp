@@ -172,6 +172,10 @@ strMyRecord::strMyRecord():m_id(__global_record_id++) {
 
 }
 
+int strMyRecord::GetFieldNum() const {
+	return 18;
+}
+
 std::string strMyRecord::GetFieldName(int index) const {
 	switch (index)
 	{
