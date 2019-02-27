@@ -1,5 +1,4 @@
-#include "ClusterTree.h"
-#include "Log.h"
+#include "include/ClusterTree.h"
 
 #include <cmath>
 
@@ -12,11 +11,11 @@ ClusterNode::~ClusterNode() {
 				delete pChildNode[i];
 }
 
-double ClusterNode::CalCenterDistance(strMyRecord* pRecord) const {
+double ClusterNode::CalCenterDistance(Record* pRecord) const {
 	return pRecord ? m_cluster.CalcDistance(pRecord) : 0;
 }
 
-const ClusterNode* ClusterNode::GetNearestCluster(strMyRecord *pRecord) const {
+const ClusterNode* ClusterNode::GetNearestCluster(Record *pRecord) const {
 	int i;
 	double MinDistance, TmpDistance;		// 最短距离，临时距离
 	const ClusterNode* pNearestNode;		// 距离最近节点的指针

@@ -2,6 +2,7 @@
 #define KMEANS_H
 
 #include "Cluster.h"
+#include "Record.h"
 
 #include <vector>
 
@@ -26,12 +27,12 @@ struct KOptions
 	std::string LogFile;		// 日志文件，默认为 "Log.txt"，若为空，则不写入文件
 };
 
-class CKMeans : public Object
+class KMeans : public Object
 {
 public:
-	CKMeans(KOptions options = KOptions());
+	KMeans(KOptions options = KOptions());
 
-	~CKMeans();
+	~KMeans();
 
 	// 运行 KMeans 算法，返回训练后的聚类树，可用于预测结果
 	template < typename Iter >
@@ -49,10 +50,10 @@ public:
 	KOptions GetOptions() const { return m_options; }
 
 private:
-	CKMeans(ClusterNode *pSelf, ClusterTree *pTree, int KmeansID, int Level, const record_list& pDataList, KOptions options,Log* l);
+	KMeans(ClusterNode *pSelf, ClusterTree *pTree, int KmeansID, int Level, const record_list& pDataList, KOptions options,Log* l);
 
 	//判断该条记录与之前的聚类中心是否完全相同
-	bool isSameAsCluster(strMyRecord *pRecord) const;
+	bool isSameAsCluster(Record *pRecord) const;
 
 	//K-means算法的第一步：从n个数据对象任意选择k个对象作为初始聚类中心
 	void InitClusters(unsigned int NumClusters);
@@ -67,7 +68,7 @@ private:
 	ClusterTree* _runKMeans();
 
 	//找到离给定数据对象最近的一个聚类
-	int FindClosestCluster(strMyRecord *pRecord) const;
+	int FindClosestCluster(Record *pRecord) const;
 
 	//检查聚类后一类中的分类是否合理
 	bool IsClusterOK(int i) const;
@@ -93,7 +94,7 @@ private:
 	record_list m_RecordsList;		// 数据记录链表
 	std::vector<Cluster> m_Cluster;	// 子类数组
 	int m_ClusterLevel;				// 聚类对象所处的层次
-	int m_KmeansID;					// CKMeans对象的ID号
+	int m_KmeansID;					// KMeans对象的ID号
 	ClusterTree *pClusterTree;		// 聚类树的指针
 	ClusterNode *pSelfClusterNode;	// 与本KMeans对象相关的聚类节点的指针
 

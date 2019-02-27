@@ -1,7 +1,7 @@
 #ifndef CLUSTER_H
 #define CLUSTER_H
 
-#include "strmyrecord.h"
+#include "Record.h"
 
 #include <map>
 #include <vector>
@@ -17,10 +17,10 @@ public:
 	Cluster(int dimension = 0) :m_hasCalculated(false), m_mainLabel(0), m_clusterPrecition(1.0), m_center(dimension, 0.0) {}
 
 	// 初始化一个聚类：清空所有数据，并添加一条记录，再更新中心为这条记录
-	void Init(strMyRecord* record);
+	void Init(Record* record);
 
 	// 把一条记录添加到类簇中
-	void Add(strMyRecord* record);
+	void Add(Record* record);
 
 	// 清空类簇中的所有记录
 	void Clear();
@@ -31,14 +31,14 @@ public:
 	// 更新类簇中心
 	bool UpdateCenter();
 
-	double CalcDistance(strMyRecord *record) const;
+	double CalcDistance(Record *record) const;
 
 	// 判断聚类中心是否相等，中心相等即对象相等
 	bool operator==(const Cluster&) const;
 	bool operator!=(const Cluster& other) const { return !operator==(other); }
 
 	// 判断聚类中心是否跟记录相等
-	bool Equal(strMyRecord* record) const;
+	bool Equal(Record* record) const;
 
 	// 获取属于该聚类的记录总数量
 	int GetTotalNum() const { return m_records.size(); }

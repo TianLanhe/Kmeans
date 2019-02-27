@@ -1,4 +1,4 @@
-#include "Cluster.h"
+#include "include/Cluster.h"
 
 #include <ostream>
 #include <iostream>
@@ -16,7 +16,7 @@ bool Cluster::operator==(const Cluster& other) const {
 	return true;
 }
 
-bool Cluster::Equal(strMyRecord* record) const {
+bool Cluster::Equal(Record* record) const {
 	if (m_center.size() != record->GetFieldNum())
 		return false;
 	for (center_size_type i = 0; i < m_center.size(); ++i)
@@ -97,7 +97,7 @@ std::string Cluster::GetCenterStr() const {
 	return ret;
 }
 
-void Cluster::Add(strMyRecord* record) {
+void Cluster::Add(Record* record) {
 	m_records.push_back(record);
 	m_hasCalculated = false;
 }
@@ -107,7 +107,7 @@ void Cluster::Clear() {
 	m_hasCalculated = false;
 }
 
-void Cluster::Init(strMyRecord* record) {
+void Cluster::Init(Record* record) {
 	Clear();
 	Add(record);
 	m_center.clear();
@@ -117,7 +117,7 @@ void Cluster::Init(strMyRecord* record) {
 
 bool Cluster::UpdateCenter() {
 	Cluster TempCenter(m_center.size());
-	strMyRecord *pRecord;
+	Record *pRecord;
 
 	// 聚类中没有元素了，聚簇中心不存在
 	if (m_records.empty())
@@ -145,7 +145,7 @@ bool Cluster::UpdateCenter() {
 	return false;
 }
 
-double Cluster::CalcDistance(strMyRecord *record) const {
+double Cluster::CalcDistance(Record *record) const {
 	double fDist = 0;
 
 	for (center_size_type i = 0; i < m_center.size(); ++i)

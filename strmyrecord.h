@@ -1,19 +1,17 @@
 #ifndef STR_MY_RECORD_H
 #define STR_MY_RECORD_H
 
+#include "include/Record.h"
+
 #include <string>
 #include <vector>
 
 typedef unsigned char BYTE;
 
-class strMyRecord {
+class strMyRecord : public Record {
 public:
 	friend std::istream& operator >> (std::istream &, strMyRecord &);
 	friend std::ostream& operator<<(std::ostream &, const strMyRecord &);
-
-	strMyRecord();
-	strMyRecord(const strMyRecord&);
-	strMyRecord(strMyRecord&&);
 
 public:
 	// 获取字段个数
@@ -29,8 +27,6 @@ public:
 	void SetFieldValue(int index, int value);
 	// 设置这条记录的分类标签
 	void SetLabel(int value);
-
-	unsigned int GetID() const { return m_id; }
 
 private:
 	int _stringToInt(const std::string&);
@@ -55,8 +51,6 @@ private:
 	BYTE iDstHostSrvDiffHostRate;	//37 不同主机连接相同端口比例
 	BYTE iDstHostSrvSerrorRate;	//39 连接当前主机有S0错误的比例
 	BYTE iLabel;	//42 类型标签
-
-	unsigned int m_id;
 };
 
 std::istream& operator >> (std::istream &, strMyRecord &);
@@ -72,17 +66,6 @@ BYTE getStatusFlag(const std::string& str);
 BYTE getLabel(const std::string& str);
 // 将符号值标签转换为字符串
 std::string getLabelName(BYTE label);
-
-
-// 聚类对象的基类
-class Object {
-public:
-	typedef std::vector<strMyRecord*> record_list;
-	typedef record_list::iterator record_iterator;
-	typedef record_list::const_iterator record_const_iterator;
-
-	virtual ~Object() {}
-};
 
 #endif // !STR_MY_RECORD_H
 

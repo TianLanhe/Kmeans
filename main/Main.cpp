@@ -1,23 +1,25 @@
-#include "ClusterTree.h"
-#include "Kmeans.h"
-#include "ConfuseMatrix.h"
-#include "Log.h"
+#include "include/ClusterTree.h"
+#include "include/Kmeans.h"
+#include "include/ConfuseMatrix.h"
+
+#include "strmyrecord.h"
 
 #include <fstream>
 #include <iostream>
 #include <vector>
-#include <iomanip>
-#include <cstdio>
 #include <ctime>
 
 // 训练集文件
 #define TRAINING_FILE "data/kddcup.data_10_percent_corrected_datatreat"
 // 测试集文件
 #define TESTING_FILE "data/corrected_datatreat"
-// 结果文件
-#define RESULT_FILE "Result.txt"
 
 using namespace std;
+
+// 读取测试数据
+vector<strMyRecord> ReadTestFile();
+// 读取训练数据
+vector<strMyRecord> ReadTrainingFile();
 
 vector<strMyRecord> ReadTestFile() {
 	vector<strMyRecord> ret;
@@ -70,10 +72,10 @@ int main() {
 	// 创建 CKMeans 对象
 	KOptions options;
 	//options.Consistency = false;
-	options.ThreadNum = 8;
-	options.Print = false;
+	//options.ThreadNum = 8;
+	//options.Print = false;
 	options.LogFile = "";
-	CKMeans m_CKMeans(options);
+	KMeans m_CKMeans(options);
 
 	// 读取训练数据集中的数据
 	vector<strMyRecord> trainingRecords(ReadTrainingFile());
@@ -83,21 +85,18 @@ int main() {
 
 	// 开始递归聚类过程，生成聚类树
 	ClusterTree *clusterTree = m_CKMeans.RunKMeans(trainingRecords.begin(),trainingRecords.end());
+
+	// 记录结束时间
 	int train_time = time(NULL) - start;
 
-	// 将聚类结果打印到日志文件中
+	// 打印聚类结果
 	cout << *clusterTree;
 
-	Log out;
-	out.add(&cout);
-	out.add(new ofstream(RESULT_FILE));
-
 	cout << "Start classifying testing records ... " << endl;
-	out << "********************** Classification Result **************************" << endl;
+	cout << "********************** Classification Result **************************" << endl;
 
 	// 读取测试数据集中的数据
 	vector<strMyRecord> testList(ReadTestFile());
-
 
 	// 为测试数据寻找最近的聚类节点，并将该节点的类别作为这条记录的预测类别
 	// 将数据记录的预测类型与正确类别比较，统计模型预测的准确率
@@ -111,21 +110,25 @@ int main() {
 		if ((i + 1) % 10000 == 0) {
 			cout << "----------- " << i + 1 << "  records have been done ----------" << endl;
 		}
-		//out << "True Label = " << getLabelName(testList[i].GetLabel()) << "   Pre Label = " << getLabelName(pNode->GetClusterNodeLabel()) << "   Cluster Path = " << pNode->strPath << endl;
+		//cout << "True Label = " << getLabelName(testList[i].GetLabel()) << "   Pre Label = " << getLabelName(pNode->GetClusterNodeLabel()) << "   Cluster Path = " << pNode->strPath << endl;
 	}
 	cout << testList.size() << " records have been classified" << endl;
 
+	// 记录分类时间
 	int classfy_time = time(NULL) - start;
-	cout << "Training time: " << train_time << " s" << endl;
+
+	// 打印训练和分类时间
+	cout << "Training cost: " << train_time << " s" << endl;
 	cout << "Classifing cost: " << classfy_time << " s" << endl;
 
-	out << matrix;
-	out << "Cluster_Percition = " << m_CKMeans.GetOptions().ClusterPrecision << " Dimension = " << options.Dimension << " Consistency = " << options.Consistency << " Thread_Number = " << options.ThreadNum << endl;
-	out << "FieldName: ";
+	// 打印分类结果
+	cout << matrix;
+	cout << "Cluster_Percition = " << m_CKMeans.GetOptions().ClusterPrecision << " Dimension = " << options.Dimension << " Consistency = " << options.Consistency << " Thread_Number = " << options.ThreadNum << endl;
+	cout << "FieldName: ";
 	for (int i = 0; i < options.Dimension; ++i) {
-		out << testList[0].GetFieldName(i) << ' ';
+		cout << testList[0].GetFieldName(i) << ' ';
 	}
-	out << endl;
+	cout << endl;
 
 	delete clusterTree;
 	return 0;

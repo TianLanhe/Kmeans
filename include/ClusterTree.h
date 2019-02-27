@@ -2,6 +2,7 @@
 #define CLUSTER_TREE_H
 
 #include "Cluster.h"
+#include "Record.h"
 
 #include <string>
 #include <vector>
@@ -19,7 +20,7 @@ public:
 	~ClusterNode();
 
 	//计算该条记录到该节点中心的距离
-	double CalCenterDistance(strMyRecord* pRecord) const;
+	double CalCenterDistance(Record* pRecord) const;
 
 	//获得孩子i的指针
 	int GetChildCount() const { return pChildNode.size(); }
@@ -32,7 +33,7 @@ public:
 	int GetClusterNodeLabel() const { return m_cluster.GetMainLabel(); }
 
 	//递归函数，在以该节点为父亲的子树中，获得与数据记录距离最近的聚类节点
-	const ClusterNode* GetNearestCluster(strMyRecord* pRecord) const ;
+	const ClusterNode* GetNearestCluster(Record* pRecord) const ;
 
 private:
 	Cluster m_cluster;				//聚类信息
@@ -67,7 +68,7 @@ public:
 	void InsertNode(ClusterNode *pParent, ClusterNode *pNode);
 
 	//找到与给定记录距离最近的聚类节点
-	const ClusterNode* FindNearestCluster(strMyRecord *pRecord) const { return  pRootNode->GetNearestCluster(pRecord); }
+	const ClusterNode* FindNearestCluster(Record *pRecord) const { return  pRootNode->GetNearestCluster(pRecord); }
 
 	//获得根节点
 	ClusterNode* GetRootNode() const { return pRootNode; }

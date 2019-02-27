@@ -167,25 +167,6 @@ istream& operator >> (istream &in, strMyRecord &record) {
 	return in;
 }
 
-unsigned int __global_record_id = 1;
-strMyRecord::strMyRecord():m_id(__global_record_id++) { }
-
-strMyRecord::strMyRecord(const strMyRecord& record) : m_id(__global_record_id++) {
-	for (int i = 0; i < GetFieldNum(); ++i) {
-		SetFieldValue(i, record.GetFieldValue(i));
-		SetLabel(record.GetLabel());
-	}
-}
-
-strMyRecord::strMyRecord(strMyRecord&& record){
-	for (int i = 0; i < GetFieldNum(); ++i) {
-		SetFieldValue(i, record.GetFieldValue(i));
-		SetLabel(record.GetLabel());
-	}
-	m_id = record.m_id;
-}
-
-
 int strMyRecord::GetFieldNum() const {
 	return 18;
 }

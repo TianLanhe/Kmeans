@@ -1,6 +1,6 @@
-#include "Kmeans.h"
-#include "ClusterTree.h"
-#include "Log.h"
+#include "include/Kmeans.h"
+#include "include/ClusterTree.h"
+#include "include/Log.h"
 #include "ThreadPool/include/ThreadPoolFactory.h"
 #include "ThreadPool/include/ThreadPool.h"
 #include "ThreadPool/include/Task.h"
@@ -21,12 +21,12 @@ using namespace std;
 
 
 ////////////// 随机数相关函数 ///////////////
-int CKMeans::initRandSeed() {
+int KMeans::initRandSeed() {
 	srand(time(NULL));
 	return 0;
 }
 
-int CKMeans::nrand(int n) {
+int KMeans::nrand(int n) {
 	// 如果要求强一直，则不初始随机数种子
 	if (!m_options.Consistency)
 		static int r = initRandSeed();
@@ -43,14 +43,14 @@ int CKMeans::nrand(int n) {
 	return ret;
 }
 
-int CKMeans::getRandomNumByLength(int start, int length) {
+int KMeans::getRandomNumByLength(int start, int length) {
 	if (RAND_MAX - start < length)
 		length = RAND_MAX - start;
 
 	return nrand(length) + start;
 }
 
-int CKMeans::getRandomNumByRange(int start, int end) {
+int KMeans::getRandomNumByRange(int start, int end) {
 	if (end > RAND_MAX) {
 		end = RAND_MAX;
 	}
@@ -82,7 +82,7 @@ public:
 
 private:
 
-	int _findClosestCluster(strMyRecord *pRecord) const {
+	int _findClosestCluster(Record *pRecord) const {
 		int minindex = 0;
 		double dist;
 		double mindist = m_clusters[minindex]->CalcDistance(pRecord);
@@ -127,12 +127,12 @@ bool CalcNewCenterTask::m_isChanged = false;
 
 ///////////////////////////////////////////////
 
-CKMeans::CKMeans(ClusterNode *pSelf, ClusterTree *pTree, int KmeansID, int Level, const record_list& pDataList, KOptions options, Log* l) :pSelfClusterNode(pSelf), pClusterTree(pTree), m_KmeansID(KmeansID), m_ClusterLevel(Level), m_RecordsList(pDataList), m_options(options), m_log(l)
+KMeans::KMeans(ClusterNode *pSelf, ClusterTree *pTree, int KmeansID, int Level, const record_list& pDataList, KOptions options, Log* l) :pSelfClusterNode(pSelf), pClusterTree(pTree), m_KmeansID(KmeansID), m_ClusterLevel(Level), m_RecordsList(pDataList), m_options(options), m_log(l)
 {
 	(*m_log) << "********** Creat a new Kmeans, ID = " << m_KmeansID << " **********" << endl;
 }
 
-CKMeans::CKMeans(KOptions options)
+KMeans::KMeans(KOptions options)
 	: m_KmeansID(0),
 	m_ClusterLevel(1),
 	m_options(options)
@@ -149,13 +149,13 @@ CKMeans::CKMeans(KOptions options)
 	(*m_log) << "********** Creat a new Kmeans, ID = " << m_KmeansID << " **********" << endl;
 }
 
-CKMeans::~CKMeans() {
+KMeans::~KMeans() {
 	// 最顶上的 KMeans 对象负责销毁 Logger
 	if (pSelfClusterNode->GetParentNode() == NULL)
 		delete m_log;
 }
 
-/*bool CKMeans::ReadTrainingRecords() {
+/*bool KMeans::ReadTrainingRecords() {
 	ifstream in(TRAINING_FILE);
 	if (!in)
 		return false;
@@ -206,7 +206,7 @@ CKMeans::~CKMeans() {
 	return true;
 }*/
 
-bool CKMeans::isSameAsCluster(strMyRecord *pRecord) const {
+bool KMeans::isSameAsCluster(Record *pRecord) const {
 	for (int j = 0; j < m_Cluster.size(); ++j) {
 		if (m_Cluster[j].GetMainLabel() == pRecord->GetLabel() || m_Cluster[j].Equal(pRecord))
 			return true;
@@ -214,12 +214,12 @@ bool CKMeans::isSameAsCluster(strMyRecord *pRecord) const {
 	return false;
 }
 
-bool RecordComp(strMyRecord *r1, strMyRecord* r2) {
+bool RecordComp(Record *r1, Record* r2) {
 	return r1->GetID() < r2->GetID();
 }
 
-void CKMeans::InitClusters(unsigned int NumClusters) {
-	strMyRecord *pRecord;						// 遍历记录的指针
+void KMeans::InitClusters(unsigned int NumClusters) {
+	Record *pRecord;						// 遍历记录的指针
 
 	if (m_options.Consistency)
 		sort(m_RecordsList.begin(), m_RecordsList.end(), RecordComp);
@@ -243,7 +243,7 @@ void CKMeans::InitClusters(unsigned int NumClusters) {
 	}
 }
 
-int CKMeans::FindClosestCluster(strMyRecord *pRecord) const {
+int KMeans::FindClosestCluster(Record *pRecord) const {
 	int minindex = 0;
 	double dist;
 	double mindist = m_Cluster[minindex].CalcDistance(pRecord);
@@ -257,7 +257,7 @@ int CKMeans::FindClosestCluster(strMyRecord *pRecord) const {
 }
 
 
-void CKMeans::DistributeSamples() {
+void KMeans::DistributeSamples() {
 	int index;
 
 	// 清空所有聚类拥有的记录，重新计算分配
@@ -331,8 +331,8 @@ void CKMeans::DistributeSamples() {
 	}
 }
 
-bool CKMeans::CalcNewClustCenters() {
-	strMyRecord *pRecord;
+bool KMeans::CalcNewClustCenters() {
+	Record *pRecord;
 
 	bool isChanged = false;
 	if (m_options.ThreadNum <= 0) {
@@ -378,7 +378,7 @@ bool CKMeans::CalcNewClustCenters() {
 				index = getRandomNumByLength(0, m_Cluster.size());
 			} while (m_Cluster[index].Empty());
 
-			strMyRecord *tempRecord;
+			Record *tempRecord;
 			double maxDist = 0, tempDist;
 			for (record_const_iterator cit = m_Cluster[index].GetRecordList().begin(); cit != m_Cluster[index].GetRecordList().end(); ++cit) {
 				pRecord = *cit;
@@ -396,7 +396,7 @@ bool CKMeans::CalcNewClustCenters() {
 	return isChanged;
 }
 
-bool CKMeans::IsClusterOK(int i)  const {
+bool KMeans::IsClusterOK(int i)  const {
 	int count = m_Cluster[i].GetIncorrectNum();
 	double precition = m_Cluster[i].GetClusterPrecition();
 
@@ -425,7 +425,7 @@ bool CKMeans::IsClusterOK(int i)  const {
 }
 
 int ext_global_kmeansID;
-ClusterTree* CKMeans::_runKMeans() {
+ClusterTree* KMeans::_runKMeans() {
 	(*m_log) << "Init K-value = " << m_options.KValue << endl;
 
 	// 初始化本次聚类的中心
@@ -466,18 +466,18 @@ ClusterTree* CKMeans::_runKMeans() {
 		if (!IsClusterOK(i) && !IsStopRecursion(i)) {
 			KOptions options = m_options;
 			options.KValue = GetDiffLabelofCluster(i);
-			CKMeans(pSelfClusterNode->GetChildNode(i), pClusterTree, ++ext_global_kmeansID, m_ClusterLevel + 1, m_Cluster[i].GetRecordList(), options, m_log)._runKMeans();
+			KMeans(pSelfClusterNode->GetChildNode(i), pClusterTree, ++ext_global_kmeansID, m_ClusterLevel + 1, m_Cluster[i].GetRecordList(), options, m_log)._runKMeans();
 		}
 	}
 
 	return pClusterTree;
 }
 
-int CKMeans::GetDiffLabelofCluster(int i) const {
+int KMeans::GetDiffLabelofCluster(int i) const {
 	return m_Cluster[i].GetLabelNum();
 }
 
-void CKMeans::CreatClusterTreeNode() {
+void KMeans::CreatClusterTreeNode() {
 	for (int i = 0; i < m_Cluster.size(); ++i) {
 		m_Cluster[i].CalcInfo();
 
