@@ -69,8 +69,8 @@ int main() {
 
 	// 创建 CKMeans 对象
 	KOptions options;
-	options.Consistency = false;
-	options.ThreadNum = 1;
+	//options.Consistency = false;
+	options.ThreadNum = 8;
 	options.Print = false;
 	options.LogFile = "";
 	CKMeans m_CKMeans(options);
@@ -120,7 +120,7 @@ int main() {
 	cout << "Classifing cost: " << classfy_time << " s" << endl;
 
 	out << matrix;
-	out << "CLUSTER_PRECITION = " << m_CKMeans.GetOptions().ClusterPrecision << " DIMENSION = " << options.Dimension << endl;
+	out << "Cluster_Percition = " << m_CKMeans.GetOptions().ClusterPrecision << " Dimension = " << options.Dimension << " Consistency = " << options.Consistency << " Thread_Number = " << options.ThreadNum << endl;
 	out << "FieldName: ";
 	for (int i = 0; i < options.Dimension; ++i) {
 		out << testList[0].GetFieldName(i) << ' ';

@@ -12,6 +12,8 @@ public:
 	friend std::ostream& operator<<(std::ostream &, const strMyRecord &);
 
 	strMyRecord();
+	strMyRecord(const strMyRecord&);
+	strMyRecord(strMyRecord&&);
 
 public:
 	// 获取字段个数
@@ -28,7 +30,7 @@ public:
 	// 设置这条记录的分类标签
 	void SetLabel(int value);
 
-	int GetID() const { return m_id; }
+	unsigned int GetID() const { return m_id; }
 
 private:
 	int _stringToInt(const std::string&);
@@ -54,7 +56,7 @@ private:
 	BYTE iDstHostSrvSerrorRate;	//39 连接当前主机有S0错误的比例
 	BYTE iLabel;	//42 类型标签
 
-	int m_id;
+	unsigned int m_id;
 };
 
 std::istream& operator >> (std::istream &, strMyRecord &);
