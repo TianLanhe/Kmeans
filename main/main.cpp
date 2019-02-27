@@ -10,6 +10,13 @@
 #include <cstdio>
 #include <ctime>
 
+// 训练集文件
+#define TRAINING_FILE "data/kddcup.data_10_percent_corrected_datatreat"
+// 测试集文件
+#define TESTING_FILE "data/corrected_datatreat"
+// 结果文件
+#define RESULT_FILE "Result.txt"
+
 using namespace std;
 
 vector<strMyRecord> ReadTestFile() {
@@ -34,29 +41,48 @@ vector<strMyRecord> ReadTestFile() {
 	return ret;
 }
 
+vector<strMyRecord> ReadTrainingFile() {
+	vector<strMyRecord> ret;
+
+	ifstream in(TRAINING_FILE);
+	if (!in)
+		return ret;
+
+	cout << "Start reading training records from " << TRAINING_FILE << " ..." << endl;
+
+	strMyRecord record;
+	while (in >> record) {
+		ret.push_back(record);
+
+		if (ret.size() % 10000 == 0) {
+			cout << "----------- " << ret.size() << "  lines have read ----------" << endl;
+		}
+	}
+	cout << ret.size() << "  lines have read" << endl;
+	in.close();
+
+	return ret;
+}
+
 int main() {
 	cout << "Start K-means clustering proccess ..." << endl;
 
 	// 创建 CKMeans 对象
 	KOptions options;
-	//options.Unique = true;
-	//options.Consistency = false;
+	options.Consistency = false;
 	options.ThreadNum = 1;
-	//options.Print = false;
+	options.Print = false;
 	options.LogFile = "";
 	CKMeans m_CKMeans(options);
 
 	// 读取训练数据集中的数据
-	if (!m_CKMeans.ReadTrainingRecords()) {
-		cout << "Read training records \"" << TRAINING_FILE << "\" error" << endl; 
-		return 1;
-	}
+	vector<strMyRecord> trainingRecords(ReadTrainingFile());
 
 	// 记录开始时间
 	int start = time(NULL);
 
 	// 开始递归聚类过程，生成聚类树
-	ClusterTree *clusterTree = m_CKMeans.RunKMeans();
+	ClusterTree *clusterTree = m_CKMeans.RunKMeans(trainingRecords.begin(),trainingRecords.end());
 	int train_time = time(NULL) - start;
 
 	// 将聚类结果打印到日志文件中
@@ -75,7 +101,7 @@ int main() {
 
 	// 为测试数据寻找最近的聚类节点，并将该节点的类别作为这条记录的预测类别
 	// 将数据记录的预测类型与正确类别比较，统计模型预测的准确率
-	ConfuseMatrix matrix(options.KValue,options.KValue);
+	ConfuseMatrix matrix(options.KValue, options.KValue);
 	start = time(NULL);
 	for (vector<strMyRecord>::size_type i = 0; i < testList.size(); ++i) {
 		const ClusterNode* pNode = clusterTree->FindNearestCluster(&testList[i]);
@@ -94,7 +120,7 @@ int main() {
 	cout << "Classifing cost: " << classfy_time << " s" << endl;
 
 	out << matrix;
-	out << "CLUSTER_PRECITION = " << m_CKMeans.GetOptions().ClusterPrecision << " DIMENSION = " << options.Dimension << " Unique = " << (options.Unique ? "true" : "false") << endl;
+	out << "CLUSTER_PRECITION = " << m_CKMeans.GetOptions().ClusterPrecision << " DIMENSION = " << options.Dimension << endl;
 	out << "FieldName: ";
 	for (int i = 0; i < options.Dimension; ++i) {
 		out << testList[0].GetFieldName(i) << ' ';

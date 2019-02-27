@@ -155,7 +155,7 @@ CKMeans::~CKMeans() {
 		delete m_log;
 }
 
-bool CKMeans::ReadTrainingRecords() {
+/*bool CKMeans::ReadTrainingRecords() {
 	ifstream in(TRAINING_FILE);
 	if (!in)
 		return false;
@@ -204,7 +204,7 @@ bool CKMeans::ReadTrainingRecords() {
 	in.close();
 
 	return true;
-}
+}*/
 
 bool CKMeans::isSameAsCluster(strMyRecord *pRecord) const {
 	for (int j = 0; j < m_Cluster.size(); ++j) {
@@ -425,7 +425,7 @@ bool CKMeans::IsClusterOK(int i)  const {
 }
 
 int ext_global_kmeansID;
-ClusterTree* CKMeans::RunKMeans() {
+ClusterTree* CKMeans::_runKMeans() {
 	(*m_log) << "Init K-value = " << m_options.KValue << endl;
 
 	// 初始化本次聚类的中心
@@ -466,7 +466,7 @@ ClusterTree* CKMeans::RunKMeans() {
 		if (!IsClusterOK(i) && !IsStopRecursion(i)) {
 			KOptions options = m_options;
 			options.KValue = GetDiffLabelofCluster(i);
-			CKMeans(pSelfClusterNode->GetChildNode(i), pClusterTree, ++ext_global_kmeansID, m_ClusterLevel + 1, m_Cluster[i].GetRecordList(), options, m_log).RunKMeans();
+			CKMeans(pSelfClusterNode->GetChildNode(i), pClusterTree, ++ext_global_kmeansID, m_ClusterLevel + 1, m_Cluster[i].GetRecordList(), options, m_log)._runKMeans();
 		}
 	}
 
@@ -475,12 +475,6 @@ ClusterTree* CKMeans::RunKMeans() {
 
 int CKMeans::GetDiffLabelofCluster(int i) const {
 	return m_Cluster[i].GetLabelNum();
-}
-
-std::string intToString(int i) {
-	std::stringstream s;
-	s << i;
-	return s.str();
 }
 
 void CKMeans::CreatClusterTreeNode() {

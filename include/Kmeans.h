@@ -1,7 +1,6 @@
 #ifndef KMEANS_H
 #define KMEANS_H
 
-#include "Common.h"
 #include "Cluster.h"
 
 #include <vector>
@@ -13,11 +12,10 @@ class Log;
 // 算法参数选项
 struct KOptions
 {
-	KOptions() :Dimension(18), Unique(false), Print(true), Consistency(true), ClusterPrecision(0.1),
+	KOptions() :Dimension(18), Print(true), Consistency(true), ClusterPrecision(0.1),
 		MaxLevel(10), ThreadNum(4), PrecisionIncreaseLevel(3), KValue(5),LogFile("Log.txt") {}
 
 	int Dimension;		// 数据维数，默认 18
-	bool Unique;		// 是否去重，默认 false
 	bool Print;			// 是否打印日志，默认 true
 	bool Consistency;	// 结果是否需要强一致(多线程并发的随机性可能导致训练结果的不确定性)，默认 true
 	double ClusterPrecision;	// 聚类精度阈值，默认 0.1
@@ -35,11 +33,17 @@ public:
 
 	~CKMeans();
 
-	//读取经过数据预处理的记录
-	bool ReadTrainingRecords();
+	// 运行 KMeans 算法，返回训练后的聚类树，可用于预测结果
+	template < typename Iter >
+	ClusterTree* RunKMeans(Iter begin, Iter end) {
+		m_RecordsList.clear();
+		while (begin != end) {
+			m_RecordsList.push_back(&(*begin));
+			++begin;
+		}
 
-	//K-means算法的总体过程
-	ClusterTree* RunKMeans();
+		return _runKMeans();
+	}
 
 	// 获取算法的参数配置
 	KOptions GetOptions() const { return m_options; }
@@ -58,6 +62,9 @@ private:
 
 	//K-means算法的第三步：重新计算每个聚类的中心
 	bool CalcNewClustCenters();
+
+	//K-means算法的总体过程
+	ClusterTree* _runKMeans();
 
 	//找到离给定数据对象最近的一个聚类
 	int FindClosestCluster(strMyRecord *pRecord) const;
