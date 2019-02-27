@@ -2,6 +2,7 @@
 #define CONFUSE_MATRIX_H
 
 #include <vector>
+#include <ostream>
 
 class ConfuseMatrix
 {

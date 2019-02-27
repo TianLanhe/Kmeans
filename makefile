@@ -1,4 +1,4 @@
-TARGET := DataPretreat KMeans
+TARGET := DataPretreat Main
 
 # 设置 shell，否则 echo -e 会出问题
 SHELL=/bin/bash
