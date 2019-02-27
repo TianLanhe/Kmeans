@@ -2,7 +2,7 @@
 #include "include/Kmeans.h"
 #include "include/ConfuseMatrix.h"
 
-#include "strmyrecord.h"
+#include "strmyrecord/strmyrecord.h"
 
 #include <fstream>
 #include <iostream>
@@ -72,7 +72,7 @@ int main() {
 	// 创建 CKMeans 对象
 	KOptions options;
 	//options.Consistency = false;
-	//options.ThreadNum = 8;
+	options.ThreadNum = 1;
 	//options.Print = false;
 	options.LogFile = "";
 	KMeans m_CKMeans(options);

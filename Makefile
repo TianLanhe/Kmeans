@@ -14,7 +14,7 @@ MAIN_PATH := main
 DBG_ENABLE := 0
 LIBS := pthread
 LIBRARY_PATH := /lib
-INCLUDE_PATH := .
+INCLUDE_PATH := . include
 OTHER_FLAGS := -std=c++11
 
 SOURCE_FILES := $(shell find . -path ./$(MAIN_PATH) -prune -o -path ./ThreadPool/threadPool/window -prune -o -name *.cpp -print)

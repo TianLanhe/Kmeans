@@ -1,4 +1,4 @@
-﻿#include "strmyrecord.h"
+﻿#include "strmyrecord/strmyrecord.h"
 #include <vector>
 #include <iostream>
 #include <fstream>

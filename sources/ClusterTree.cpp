@@ -1,6 +1,7 @@
 #include "include/ClusterTree.h"
 
 #include <cmath>
+#include <ostream>
 
 using namespace std;
 
